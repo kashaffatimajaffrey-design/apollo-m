@@ -91,5 +91,9 @@ CREATE INDEX IF NOT EXISTS idx_forecasts_subreddit
     ON forecasts(subreddit);
 
 -- ── Grant permissions ──────────────────────────────────────
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO apollo;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO apollo;
+-- Grants are applied by db_setup.py, not here, and only for the local layout
+-- where CEREBRO's superuser creates the objects and hands them to the `apollo`
+-- role. A managed provider issues its own owner role, so these hardcoded lines
+-- aborted the whole schema with: role "apollo" does not exist. They also named
+-- `public` explicitly, which is wrong once Apollo's tables live in their own
+-- schema.
