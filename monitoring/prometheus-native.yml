@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: apollo-m
+    static_configs:
+      - targets: ["localhost:9100"]   # the Apollo exporter (native, same host)

@@ -1,0 +1,24 @@
+# SERVE-ONLY deps — for the deployed backend + dashboard.
+# Deliberately excludes torch / transformers / pytorch-forecasting: those are only
+# needed to TRAIN. The deployed services read precomputed results from PostgreSQL /
+# CSVs, so this keeps the Render/Streamlit-Cloud build small and within free tier.
+
+# Backend (FastAPI)
+fastapi>=0.104
+uvicorn>=0.24
+psycopg2-binary>=2.9
+python-jose[cryptography]>=3.3
+passlib>=1.7
+python-multipart>=0.0.6
+
+# Dashboard (Streamlit)
+streamlit>=1.28
+plotly>=5.17
+
+# Shared
+pandas>=2.0
+numpy>=1.24
+requests>=2.31
+
+# LLM explanation layer (Claude for the demo; Ollama needs no package)
+anthropic>=0.40

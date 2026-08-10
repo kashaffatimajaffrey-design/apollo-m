@@ -1,0 +1,26 @@
+{
+  "Toxicity (TF-IDF+LR, Jigsaw)": {
+    "accuracy": "90.1%",
+    "F1 macro": "0.702",
+    "F1 micro": "0.901",
+    "precision": "0.799",
+    "recall": "0.671"
+  },
+  "CEREBRO misinfo (TF-IDF+LR)": {
+    "status": "not_evaluated",
+    "reason": "ISOT fake-news corpus (data/fake_news_corpus.csv) is not present in this checkout, and modules/cerebro_detector.py is not called by the pipeline. No held-out score exists."
+  },
+  "Moderation (RandomForest)": {
+    "status": "not_evaluated",
+    "reason": "modules/moderation_recommender.py has no callers and no saved model; its training data is generated with np.random, so any accuracy from it would be self-labelled noise."
+  },
+  "GNN (GraphSAGE)": {
+    "status": "not_run",
+    "reason": "modules/gnn_model.py is implemented but never invoked; no weights are saved and no gnn_risk column reaches any output."
+  },
+  "TFT forecaster": {
+    "horizon": "5d",
+    "bands": "p10/p50/p90",
+    "status": "measured against planted ground truth \u2014 see outputs/validation.json (destabilising recall, slope ROC-AUC). Evaluated on the declared simulation, not on real Reddit instability."
+  }
+}

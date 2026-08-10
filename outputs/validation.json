@@ -1,0 +1,20 @@
+{
+  "evaluated_on": "declared simulation with planted ground truth (data/ground_truth.json) \u2014 NOT real Reddit instability",
+  "communities": 60,
+  "planted_destabilising": 15,
+  "detection": {
+    "instability_score_roc_auc": 1.0,
+    "chi_roc_auc": 0.5748,
+    "toxicity_only_roc_auc": 0.6489
+  },
+  "forecast_tft": {
+    "destabilising_recall": 1.0,
+    "slope_roc_auc": 0.7319,
+    "mean_slope_by_trajectory": {
+      "destabilising": 0.002351,
+      "improving": -0.000777,
+      "stable": 0.000923
+    }
+  },
+  "caveat": "The instability score looks for the same shape that was planted, so its ROC-AUC is close to circular and is a wiring check, not real-world accuracy. The TFT slope AUC is an independent result: the forecaster was never shown the ground truth."
+}

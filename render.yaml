@@ -1,0 +1,60 @@
+# Render blueprint for the APOLLO-M backend.
+#
+# Deploys the read-only serving API only. Training (toxic-bert, the TFT, the
+# embedder) stays local: those need torch and several GB of RAM, while the
+# deployed service just reads precomputed results out of PostgreSQL. That split
+# is why requirements-serve.txt exists and why this builds on the free tier.
+#
+# NO SECRETS IN THIS FILE. It is committed to a public repository. Values marked
+# sync:false are entered in the Render dashboard's Environment tab, which stores
+# them encrypted; the database URL is injected by Render from the managed
+# instance below.
+services:
+  - type: web
+    name: apollo-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-serve.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: DB_HOST
+        fromDatabase:
+          name: apollo-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: apollo-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: apollo-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: apollo-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: apollo-db
+          property: password
+      # Set in the Render dashboard, never here.
+      - key: JWT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-5
+      - key: LLM_PROVIDER
+        value: claude
+      # Lets the deployed dashboard and CEREBRO call this API cross-origin.
+      - key: CORS_ORIGINS
+        sync: false
+
+databases:
+  - name: apollo-db
+    plan: free
+    databaseName: apollo_db
+    user: apollo

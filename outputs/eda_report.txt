@@ -1,0 +1,27 @@
+==================================================
+APOLLO-M EDA & PREPROCESSING REPORT
+==================================================
+Raw rows loaded:        21,461
+Columns:                ['id', 'subreddit', 'group_id', 'body', 'score', 'author', 'toxicity_label', 'toxicity_score', 'is_toxic', 'created_utc']
+Unique subreddits:      383
+After null drop:        21,461 rows
+Duplicates removed:     177
+After text cleaning:    21,284 rows
+Overall toxic rate:     72.79%
+Flagged toxic rate:     72.78%
+
+Top 10 most active subreddits:
+  r/AutoNewspaper: 13,167 posts
+  r/ABCauto: 2,993 posts
+  r/ALJAZEERAauto: 696 posts
+  r/AlJazeera: 654 posts
+  r/Android: 328 posts
+  r/AnythingGoesNews: 325 posts
+  r/ANSAauto: 164 posts
+  r/1984isreality: 135 posts
+  r/AmericanPolitics: 115 posts
+  r/AnarchistNews: 113 posts
+
+Final clean rows:       21,284
+Rows removed total:     177 (0.8%)
+==================================================

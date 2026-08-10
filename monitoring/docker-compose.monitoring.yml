@@ -1,0 +1,34 @@
+# APOLLO-M monitoring stack — Prometheus + Grafana.
+#
+# Prereq: the exporter must be running on the host first:
+#     python monitoring/exporter.py        # serves :9100/metrics
+# Then, with Docker Desktop open:
+#     docker compose -f monitoring/docker-compose.monitoring.yml up
+#
+# Prometheus → http://localhost:9090   ·   Grafana → http://localhost:3000 (admin/admin)
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: apollo-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux; no-op on Docker Desktop
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: apollo-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/apollo.yml:ro
+      - ./grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/apollo.yml:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus

@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: apollo-m
+    static_configs:
+      # host.docker.internal lets the Prometheus container reach the exporter
+      # running on the host machine (Windows/Mac Docker Desktop).
+      - targets: ["host.docker.internal:9100"]

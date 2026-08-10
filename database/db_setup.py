@@ -1,0 +1,109 @@
+"""Stand up Apollo's database inside the SAME Postgres that runs CEREBRO.
+
+This is the CEREBRO <-> Apollo connection at the infrastructure level: one
+Postgres instance, `cerebro` database for the threat-intel app, `apollo_db` for
+Apollo — created here, schema applied, and loaded with the real pipeline outputs
+so the FastAPI backend serves genuine data (not CSV reads).
+
+Run once (Postgres container must be up):
+  python database/db_setup.py
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pandas as pd
+import psycopg2
+from psycopg2.extras import execute_values
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "outputs"
+ADMIN = dict(host="127.0.0.1", port=5433, user="cerebro", password="cerebro_dev_pw")
+
+
+def band(chi: float) -> str:
+    return ("LOW" if chi >= 85 else "MEDIUM" if chi >= 75
+            else "HIGH" if chi >= 65 else "CRITICAL")
+
+
+def ensure_db_and_role() -> None:
+    con = psycopg2.connect(dbname="cerebro", **ADMIN); con.autocommit = True
+    cur = con.cursor()
+    cur.execute("SELECT 1 FROM pg_roles WHERE rolname='apollo'")
+    if not cur.fetchone():
+        cur.execute("CREATE ROLE apollo LOGIN PASSWORD 'apollo_pass'")
+    cur.execute("SELECT 1 FROM pg_database WHERE datname='apollo_db'")
+    if not cur.fetchone():
+        cur.execute("CREATE DATABASE apollo_db OWNER apollo")
+    cur.close(); con.close()
+    print("apollo_db + apollo role ready")
+
+
+def apply_schema() -> None:
+    sql = (ROOT / "database" / "schema.sql").read_text()
+    con = psycopg2.connect(dbname="apollo_db", **ADMIN); con.autocommit = True
+    cur = con.cursor()
+    cur.execute(sql)
+    cur.close(); con.close()
+    print("schema applied to apollo_db")
+
+
+def load_data() -> None:
+    meso = pd.read_csv(OUT / "meso_report.csv")
+    try:
+        cl = pd.read_csv(OUT / "clusters_report.csv")[["subreddit", "cluster", "is_outlier"]]
+        meso = meso.merge(cl, on="subreddit", how="left")
+    except Exception:
+        meso["cluster"] = None; meso["is_outlier"] = False
+    meso["cluster"] = meso["cluster"].where(pd.notna(meso["cluster"]), None)
+
+    con = psycopg2.connect(dbname="apollo_db", **ADMIN); con.autocommit = True
+    cur = con.cursor()
+    for t in ("community_health", "alerts", "forecasts"):
+        cur.execute(f"TRUNCATE {t} RESTART IDENTITY")
+
+    ch_rows = [(r.subreddit, float(r.community_health_index), float(r.toxicity_rate),
+                float(r.polarization), float(r.echo_chamber_index), float(r.churn_rate),
+                int(r.total_comments),
+                (int(r.cluster) if r.cluster is not None and pd.notna(r.cluster) else None),
+                bool(getattr(r, "is_outlier", False)) if pd.notna(getattr(r, "is_outlier", False)) else False)
+               for r in meso.itertuples()]
+    execute_values(cur,
+        "INSERT INTO community_health (subreddit, community_health_index, toxicity_rate, "
+        "polarization, echo_chamber_index, churn_rate, total_comments, cluster, is_outlier) VALUES %s",
+        ch_rows)
+
+    al_rows = [(r.subreddit, band(r.community_health_index), float(r.community_health_index),
+                f"[{band(r.community_health_index)}] {r.subreddit} CHI={r.community_health_index:.1f} "
+                f"toxicity={r.toxicity_rate:.0%}",
+                float(r.toxicity_rate), float(r.polarization), float(r.churn_rate))
+               for r in meso.itertuples()]
+    execute_values(cur,
+        "INSERT INTO alerts (subreddit, alert_level, chi, message, toxicity, polarization, churn) "
+        "VALUES %s", al_rows)
+
+    try:
+        fc = pd.read_csv(OUT / "forecast_results.csv")
+        fc_rows = [(r.subreddit, str(r.date), float(r.p50), str(r.risk_level), "TFT")
+                   for r in fc.itertuples()]
+        execute_values(cur,
+            "INSERT INTO forecasts (subreddit, forecast_date, predicted_toxicity, risk_level, method) "
+            "VALUES %s", fc_rows)
+    except Exception as exc:
+        print("forecast load skipped:", exc)
+
+    cur.execute("GRANT ALL ON ALL TABLES IN SCHEMA public TO apollo")
+    cur.execute("GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO apollo")
+    cur.execute("SELECT (SELECT count(*) FROM community_health), (SELECT count(*) FROM alerts), "
+                "(SELECT count(*) FROM forecasts)")
+    ch, al, fcn = cur.fetchone()
+    cur.close(); con.close()
+    print(f"loaded: community_health={ch}  alerts={al}  forecasts={fcn}")
+
+
+if __name__ == "__main__":
+    ensure_db_and_role()
+    apply_schema()
+    load_data()
+    print("apollo_db ready — one Postgres instance now serves both CEREBRO and Apollo.")

@@ -1,0 +1,302 @@
+{
+  "AutoNewspaper": {
+    "baseline_toxicity": 0.3433,
+    "trajectory": "stable",
+    "delta_over_window": 0.0044
+  },
+  "politics": {
+    "baseline_toxicity": 0.346,
+    "trajectory": "stable",
+    "delta_over_window": 0.0058
+  },
+  "worldnewshub": {
+    "baseline_toxicity": 0.4171,
+    "trajectory": "stable",
+    "delta_over_window": -0.0128
+  },
+  "TheNewsFeed": {
+    "baseline_toxicity": 0.333,
+    "trajectory": "stable",
+    "delta_over_window": -0.0337
+  },
+  "news": {
+    "baseline_toxicity": 0.1928,
+    "trajectory": "improving",
+    "delta_over_window": -0.1456
+  },
+  "The_Donald": {
+    "baseline_toxicity": 0.1742,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.4163
+  },
+  "UMukhasimAutoNews": {
+    "baseline_toxicity": 0.1082,
+    "trajectory": "stable",
+    "delta_over_window": 0.0138
+  },
+  "worldnews": {
+    "baseline_toxicity": 0.179,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.4072
+  },
+  "EcoInternet": {
+    "baseline_toxicity": 0.2205,
+    "trajectory": "stable",
+    "delta_over_window": 0.0097
+  },
+  "TheColorIsBlue": {
+    "baseline_toxicity": 0.183,
+    "trajectory": "stable",
+    "delta_over_window": 0.0133
+  },
+  "FOXauto": {
+    "baseline_toxicity": 0.2785,
+    "trajectory": "stable",
+    "delta_over_window": -0.0289
+  },
+  "WAPOauto": {
+    "baseline_toxicity": 0.0941,
+    "trajectory": "stable",
+    "delta_over_window": -0.0076
+  },
+  "NBCauto": {
+    "baseline_toxicity": 0.398,
+    "trajectory": "stable",
+    "delta_over_window": -0.0041
+  },
+  "NYPOSTauto": {
+    "baseline_toxicity": 0.1117,
+    "trajectory": "stable",
+    "delta_over_window": 0.0087
+  },
+  "india": {
+    "baseline_toxicity": 0.5026,
+    "trajectory": "stable",
+    "delta_over_window": -0.0106
+  },
+  "HTauto": {
+    "baseline_toxicity": 0.1957,
+    "trajectory": "stable",
+    "delta_over_window": -0.0205
+  },
+  "willis7737_news": {
+    "baseline_toxicity": 0.2044,
+    "trajectory": "stable",
+    "delta_over_window": 0.0071
+  },
+  "ABCauto": {
+    "baseline_toxicity": 0.5772,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.3536
+  },
+  "FRANCE24auto": {
+    "baseline_toxicity": 0.1151,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.3309
+  },
+  "NDTVauto": {
+    "baseline_toxicity": 0.1823,
+    "trajectory": "stable",
+    "delta_over_window": 0.0083
+  },
+  "TETauto": {
+    "baseline_toxicity": 0.1339,
+    "trajectory": "improving",
+    "delta_over_window": -0.1781
+  },
+  "newsbotbot": {
+    "baseline_toxicity": 0.1349,
+    "trajectory": "stable",
+    "delta_over_window": -0.0032
+  },
+  "ukpolitics": {
+    "baseline_toxicity": 0.1742,
+    "trajectory": "stable",
+    "delta_over_window": 0.0056
+  },
+  "SCMPauto": {
+    "baseline_toxicity": 0.4344,
+    "trajectory": "stable",
+    "delta_over_window": -0.0237
+  },
+  "VANGUARDauto": {
+    "baseline_toxicity": 0.0708,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.4059
+  },
+  "INDEPENDENTauto": {
+    "baseline_toxicity": 0.1375,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2789
+  },
+  "CHINADAILYauto": {
+    "baseline_toxicity": 0.2279,
+    "trajectory": "stable",
+    "delta_over_window": -0.0256
+  },
+  "Raytheon": {
+    "baseline_toxicity": 0.2961,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.3393
+  },
+  "TELEGRAPHauto": {
+    "baseline_toxicity": 0.5275,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2417
+  },
+  "nottheonion": {
+    "baseline_toxicity": 0.6607,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2482
+  },
+  "BBCauto": {
+    "baseline_toxicity": 0.5792,
+    "trajectory": "stable",
+    "delta_over_window": -0.0221
+  },
+  "IRISHTIMESauto": {
+    "baseline_toxicity": 0.1875,
+    "trajectory": "improving",
+    "delta_over_window": -0.1216
+  },
+  "DonaldTrumpWhiteHouse": {
+    "baseline_toxicity": 0.3273,
+    "trajectory": "stable",
+    "delta_over_window": -0.041
+  },
+  "GUARDIANauto": {
+    "baseline_toxicity": 0.4189,
+    "trajectory": "stable",
+    "delta_over_window": -0.0067
+  },
+  "SMHauto": {
+    "baseline_toxicity": 0.4194,
+    "trajectory": "stable",
+    "delta_over_window": 0.0098
+  },
+  "RedditSample": {
+    "baseline_toxicity": 0.1512,
+    "trajectory": "stable",
+    "delta_over_window": 0.0267
+  },
+  "WAEXauto": {
+    "baseline_toxicity": 0.2837,
+    "trajectory": "stable",
+    "delta_over_window": 0.0035
+  },
+  "unitedkingdom": {
+    "baseline_toxicity": 0.1254,
+    "trajectory": "improving",
+    "delta_over_window": -0.1894
+  },
+  "EnoughTrumpSpam": {
+    "baseline_toxicity": 0.2997,
+    "trajectory": "stable",
+    "delta_over_window": 0.0063
+  },
+  "CBSauto": {
+    "baseline_toxicity": 0.544,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.3421
+  },
+  "technology": {
+    "baseline_toxicity": 0.0632,
+    "trajectory": "stable",
+    "delta_over_window": -0.0175
+  },
+  "TIMESINDIAauto": {
+    "baseline_toxicity": 0.4462,
+    "trajectory": "stable",
+    "delta_over_window": -0.0257
+  },
+  "BANGKOKPOSTauto": {
+    "baseline_toxicity": 0.0492,
+    "trajectory": "improving",
+    "delta_over_window": -0.1892
+  },
+  "conspiracy": {
+    "baseline_toxicity": 0.455,
+    "trajectory": "stable",
+    "delta_over_window": 0.0155
+  },
+  "CHICAGOSUNauto": {
+    "baseline_toxicity": 0.3656,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2249
+  },
+  "SLTRIBauto": {
+    "baseline_toxicity": 0.2996,
+    "trajectory": "stable",
+    "delta_over_window": 0.0203
+  },
+  "europe": {
+    "baseline_toxicity": 0.3038,
+    "trajectory": "stable",
+    "delta_over_window": -0.0144
+  },
+  "canada": {
+    "baseline_toxicity": 0.1449,
+    "trajectory": "stable",
+    "delta_over_window": 0.0315
+  },
+  "IOLauto": {
+    "baseline_toxicity": 0.4797,
+    "trajectory": "improving",
+    "delta_over_window": -0.1078
+  },
+  "Conservative": {
+    "baseline_toxicity": 0.2719,
+    "trajectory": "improving",
+    "delta_over_window": -0.2469
+  },
+  "SDauto": {
+    "baseline_toxicity": 0.213,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2509
+  },
+  "movies": {
+    "baseline_toxicity": 0.1518,
+    "trajectory": "stable",
+    "delta_over_window": -0.0047
+  },
+  "TJTauto": {
+    "baseline_toxicity": 0.3515,
+    "trajectory": "improving",
+    "delta_over_window": -0.1625
+  },
+  "SkydTech": {
+    "baseline_toxicity": 0.4411,
+    "trajectory": "stable",
+    "delta_over_window": -0.0012
+  },
+  "TORONTOSTARauto": {
+    "baseline_toxicity": 0.0866,
+    "trajectory": "improving",
+    "delta_over_window": -0.1721
+  },
+  "Futurology": {
+    "baseline_toxicity": 0.2945,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.405
+  },
+  "TheColorIsOrange": {
+    "baseline_toxicity": 0.31,
+    "trajectory": "stable",
+    "delta_over_window": -0.0236
+  },
+  "Techfeed": {
+    "baseline_toxicity": 0.3954,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.2419
+  },
+  "mobilityreport": {
+    "baseline_toxicity": 0.72,
+    "trajectory": "stable",
+    "delta_over_window": -0.0234
+  },
+  "MBauto": {
+    "baseline_toxicity": 0.1675,
+    "trajectory": "destabilising",
+    "delta_over_window": 0.4376
+  }
+}
