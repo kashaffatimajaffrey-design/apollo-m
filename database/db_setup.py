@@ -39,12 +39,19 @@ MANAGED = bool(DATABASE_URL)
 ADMIN = dict(host="127.0.0.1", port=5433, user="cerebro", password="cerebro_dev_pw")
 
 
+# Apollo's tables live in their own schema when sharing an instance with CEREBRO,
+# so `alerts` here can never be confused with anything CEREBRO owns.
+DB_SCHEMA = os.getenv("DB_SCHEMA", "apollo" if MANAGED else "public")
+
+
 def connect_apollo():
     """One place that decides where Apollo's tables live."""
+    opts = f"-c search_path={DB_SCHEMA},public"
     if MANAGED:
-        con = psycopg2.connect(DATABASE_URL, sslmode=os.getenv("PGSSLMODE", "require"))
+        con = psycopg2.connect(DATABASE_URL, options=opts,
+                               sslmode=os.getenv("PGSSLMODE", "require"))
     else:
-        con = psycopg2.connect(dbname="apollo_db", **ADMIN)
+        con = psycopg2.connect(dbname="apollo_db", options=opts, **ADMIN)
     con.autocommit = True
     return con
 
@@ -71,6 +78,12 @@ def apply_schema() -> None:
     sql = (ROOT / "database" / "schema.sql").read_text()
     con = connect_apollo()
     cur = con.cursor()
+    if DB_SCHEMA != "public":
+        # Created here rather than in schema.sql so the file stays portable, and
+        # so search_path is already correct for the unqualified CREATE TABLEs.
+        cur.execute(f"CREATE SCHEMA IF NOT EXISTS {DB_SCHEMA}")
+        cur.execute(f"SET search_path TO {DB_SCHEMA}, public")
+        print(f"using schema: {DB_SCHEMA}")
     cur.execute(sql)
     cur.close(); con.close()
     print("schema applied to apollo_db")

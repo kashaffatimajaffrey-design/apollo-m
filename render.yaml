@@ -25,26 +25,21 @@ services:
       # predictable signing key is worse than one that fails loudly on boot.
       - key: ENVIRONMENT
         value: production
-      - key: DB_HOST
-        fromDatabase:
-          name: apollo-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: apollo-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: apollo-db
-          property: database
-      - key: DB_USER
-        fromDatabase:
-          name: apollo-db
-          property: user
-      - key: DB_PASS
-        fromDatabase:
-          name: apollo-db
-          property: password
+      # Apollo shares CEREBRO's PostgreSQL rather than provisioning its own.
+      # Render's free tier permits one free database per account and CEREBRO
+      # already holds it, but this is not merely a workaround: a single instance
+      # serving both systems is the deployed form of the shared-database
+      # integration described in the technical report, and it mirrors the local
+      # setup exactly.
+      #
+      # Paste cerebro-db's INTERNAL connection string here (Render dashboard ->
+      # cerebro-db -> Internal Database URL). Internal, not external: both
+      # services run inside the same Render network, so traffic never leaves it.
+      # Apollo's tables live in the `apollo` schema, CEREBRO's in `cerebro`.
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SCHEMA
+        value: apollo
       # Set in the Render dashboard, never here.
       - key: JWT_SECRET
         sync: false
@@ -58,8 +53,7 @@ services:
       - key: CORS_ORIGINS
         sync: false
 
-databases:
-  - name: apollo-db
-    plan: free
-    databaseName: apollo_db
-    user: apollo
+# No `databases:` block on purpose — see DATABASE_URL above. Declaring one here
+# fails with "cannot have more than one active free tier database" because
+# cerebro-db already occupies that slot, and it would cancel the web service
+# along with it.

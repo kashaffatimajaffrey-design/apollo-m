@@ -54,8 +54,24 @@ app.add_middleware(
 )
 
 # ── Database connection ────────────────────────────────────────
+# DB_SCHEMA keeps Apollo's tables in their own namespace. In production Apollo
+# shares CEREBRO's PostgreSQL instance — Render's free tier allows one database
+# per account, and sharing it is the deployed form of the shared-database
+# integration the project describes. CEREBRO owns the `cerebro` schema, Apollo
+# owns `apollo`, and neither can collide with the other or with `public`.
+DB_SCHEMA = os.getenv("DB_SCHEMA", "apollo")
+_SEARCH_PATH = f"-c search_path={DB_SCHEMA},public"
+
+
 def get_db():
+    # A single DATABASE_URL is how managed providers hand out credentials; the
+    # discrete DB_* variables remain for the local shared-Postgres setup.
+    url = os.getenv("DATABASE_URL", "").strip()
+    if url:
+        return psycopg2.connect(url, options=_SEARCH_PATH,
+                                sslmode=os.getenv("PGSSLMODE", "require"))
     return psycopg2.connect(
+        options=_SEARCH_PATH,
         dbname=os.getenv("DB_NAME", "apollo_db"),
         user=os.getenv("DB_USER", "apollo"),
         password=os.getenv("DB_PASS", "apollo_pass"),
