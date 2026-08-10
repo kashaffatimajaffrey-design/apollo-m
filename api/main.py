@@ -36,10 +36,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow all origins for development (Kashaf's frontend can connect)
+# Which browser origins may call this API. Previously hardcoded to ["*"], which
+# meant the CORS_ORIGINS setting the deployment passes in did nothing at all.
+# Default stays "*" so local development and the demo keep working; set
+# CORS_ORIGINS to a comma-separated list to restrict a deployed instance, e.g.
+#   CORS_ORIGINS=https://apollo-m.streamlit.app,https://cerebro-sandy-beta.vercel.app
+#
+# allow_credentials stays off: this API authenticates with a Bearer token, not a
+# cookie, so browsers have no ambient credential to leak. Enabling it alongside
+# "*" is rejected by the CORS spec anyway.
+_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins or ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
