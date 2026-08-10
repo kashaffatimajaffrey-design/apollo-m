@@ -1,0 +1,19 @@
+# Streamlit Cloud / local dashboard config.
+# Secrets (Google OAuth, API keys) live in .streamlit/secrets.toml, which is
+# git-ignored — on Streamlit Cloud they are pasted into the app's Secrets panel.
+
+[theme]
+base = "dark"
+primaryColor = "#7c5cff"
+backgroundColor = "#0b0d17"
+secondaryBackgroundColor = "#151827"
+textColor = "#e8eaf6"
+
+[server]
+headless = true
+# Streamlit Cloud injects its own port; this only applies locally.
+enableCORS = false
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
