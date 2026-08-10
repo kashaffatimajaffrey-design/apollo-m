@@ -20,6 +20,11 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12"
+      # Makes api/auth.py refuse to start if JWT_SECRET is missing, rather than
+      # falling back to an ephemeral key. A deployed API that silently accepts a
+      # predictable signing key is worse than one that fails loudly on boot.
+      - key: ENVIRONMENT
+        value: production
       - key: DB_HOST
         fromDatabase:
           name: apollo-db
