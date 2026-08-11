@@ -48,8 +48,10 @@ def connect_apollo():
     """One place that decides where Apollo's tables live."""
     opts = f"-c search_path={DB_SCHEMA},public"
     if MANAGED:
+        # See api/main.py: 'prefer' negotiates TLS where the server offers it and
+        # falls back on Render's plaintext internal network, instead of aborting.
         con = psycopg2.connect(DATABASE_URL, options=opts,
-                               sslmode=os.getenv("PGSSLMODE", "require"))
+                               sslmode=os.getenv("PGSSLMODE", "prefer"))
     else:
         con = psycopg2.connect(dbname="apollo_db", options=opts, **ADMIN)
     con.autocommit = True

@@ -1,0 +1,25 @@
+# Backend only. Deliberately narrower than requirements-serve.txt, which also
+# carries the dashboard's Streamlit and Plotly — Streamlit drags in pyarrow, a
+# large native build that the API never imports and that is a common cause of
+# out-of-memory failures on a 512 MB free-tier build.
+#
+# Streamlit Cloud installs requirements-serve.txt for the dashboard; Render
+# installs this for the API. Neither service builds the other's dependencies.
+
+fastapi>=0.104
+uvicorn[standard]>=0.24
+psycopg2-binary>=2.9
+python-jose[cryptography]>=3.3
+# passlib provides pbkdf2_sha256 for password hashing (see api/auth.py).
+# Pinned below 1.8 because 1.7.4 is the last release verified with this code;
+# it imports the stdlib `crypt` module, which is why PYTHON_VERSION is 3.12 —
+# `crypt` was removed in 3.13.
+passlib>=1.7,<1.8
+python-multipart>=0.0.6
+
+pandas>=2.0
+numpy>=1.24
+
+# Explanation layer. Optional at runtime: api/main.py imports it lazily, so a
+# missing key degrades the prose rather than breaking the endpoints.
+anthropic>=0.40

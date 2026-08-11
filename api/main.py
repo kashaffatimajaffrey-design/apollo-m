@@ -68,8 +68,14 @@ def get_db():
     # discrete DB_* variables remain for the local shared-Postgres setup.
     url = os.getenv("DATABASE_URL", "").strip()
     if url:
+        # 'prefer', not 'require': Render's INTERNAL database hostname serves
+        # plaintext inside its private network, and psycopg2 aborts the whole
+        # connection under 'require' when the server offers no SSL. 'prefer'
+        # negotiates TLS when available — so the external hostname is still
+        # encrypted — and falls back rather than failing. Set PGSSLMODE=require
+        # to enforce it where the network is untrusted.
         return psycopg2.connect(url, options=_SEARCH_PATH,
-                                sslmode=os.getenv("PGSSLMODE", "require"))
+                                sslmode=os.getenv("PGSSLMODE", "prefer"))
     return psycopg2.connect(
         options=_SEARCH_PATH,
         dbname=os.getenv("DB_NAME", "apollo_db"),
