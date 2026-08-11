@@ -10,13 +10,26 @@ the monitoring stack is demoable on its own.
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 
 import pandas as pd
 from prometheus_client import Gauge, start_http_server
 
-OUT = Path(__file__).resolve().parents[1] / "outputs"
+ROOT = Path(__file__).resolve().parents[1]
+
+# Which dataset the monitoring stack reflects. Grafana reads Prometheus, which
+# scrapes this exporter, so the dashboard's dataset switch cannot reach it — the
+# exporter has to be told directly. It follows the same variable as db_setup.py,
+# so the API, the database and the monitoring stack always describe the same
+# corpus rather than disagreeing with one another.
+#   APOLLO_DATASET=real       -> outputs/real/   (default when present)
+#   APOLLO_DATASET=benchmark  -> outputs/
+_DS = os.getenv("APOLLO_DATASET", "real").lower()
+_REAL = ROOT / "outputs" / "real"
+OUT = _REAL if _DS == "real" and (_REAL / "meso_report.csv").exists() else ROOT / "outputs"
+print(f"exporter dataset: {'real Reddit' if OUT.name == 'real' else 'benchmark'} ({OUT})")
 PORT = 9100
 REFRESH_SECONDS = 15
 
@@ -64,7 +77,7 @@ def refresh() -> None:
     except Exception:
         pass
     try:
-        m = json.loads((OUT / "metrics.json").read_text())
+        m = json.loads((ROOT / "outputs" / "metrics.json").read_text())
         tox = m.get("Toxicity (TF-IDF+LR, Jigsaw)", {})
         G["f1_macro"].set(_f(tox.get("F1 macro", 0)))
         G["f1_micro"].set(_f(tox.get("F1 micro", 0)))
