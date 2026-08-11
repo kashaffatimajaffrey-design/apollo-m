@@ -14,6 +14,10 @@ python-multipart>=0.0.6
 # Dashboard (Streamlit)
 streamlit>=1.28
 plotly>=5.17
+# Required by st.login() for the Google (OIDC) sign-in. Without it the call
+# raises StreamlitMissingAuthlibError at click time; the dashboard now also
+# hides the button when this import fails, so the two changes are belt and braces.
+Authlib>=1.3.2
 
 # Shared
 pandas>=2.0

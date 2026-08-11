@@ -60,10 +60,25 @@ USERS = {"admin": "apollo_admin", "analyst": "apollo_analyst", "viewer": "apollo
 
 
 def _google_ready() -> bool:
+    """
+    Show the Google button only when sign-in can actually succeed.
+
+    Two conditions, and both are needed. Checking only for the secrets rendered a
+    button that raised StreamlitMissingAuthlibError the moment it was clicked,
+    because st.login() requires Authlib and the deployed environment did not have
+    it. A visible control that always fails is worse than no control — especially
+    in a live demo, where it fails in front of an audience.
+    """
     try:
-        return "auth" in st.secrets
+        if "auth" not in st.secrets:
+            return False
     except Exception:
         return False
+    try:
+        import authlib  # noqa: F401
+    except Exception:
+        return False
+    return True
 
 
 GOOGLE = _google_ready()
@@ -131,18 +146,6 @@ with st.sidebar:
     st.markdown('<div class="apollo-title" style="font-size:1.6rem">🪐 APOLLO-M</div>',
                 unsafe_allow_html=True)
     st.caption(f"Signed in: **{st.session_state.user}**")
-    # There was previously no way out of the session: once signed in, the only
-    # way to change account was to clear browser storage. Ends the Google (OIDC)
-    # session too where one exists, so "sign out" does not leave the user
-    # silently re-authenticated on the next rerun.
-    if st.button("Sign out", use_container_width=True):
-        st.session_state.user = None
-        try:
-            if GOOGLE and getattr(st, "user", None) is not None and st.user.is_logged_in:
-                st.logout()
-        except Exception:
-            pass
-        st.rerun()
     page = st.radio("Navigate", ["Overview", "🎯 Actions", "Communities", "Forecast",
                                  "Clusters", "🔴 Live", "Monitoring"])
     provider = st.radio("LLM provider", ["claude", "ollama"], horizontal=True,
@@ -156,10 +159,13 @@ with st.sidebar:
     st.link_button("📈 Prometheus", "http://localhost:9090", use_container_width=True)
     st.link_button("🔌 API docs", "http://localhost:8010/docs", use_container_width=True)
     st.divider()
-    if st.button("Sign out", use_container_width=True):
+    # Explicit key so this can never collide with another identically-configured
+    # button during a rerun (StreamlitDuplicateElementId). st.user is guarded
+    # with getattr because it does not exist on older Streamlit versions.
+    if st.button("Sign out", use_container_width=True, key="sidebar_signout"):
         st.session_state.user = None
         try:
-            if GOOGLE and st.user.is_logged_in:
+            if GOOGLE and getattr(st, "user", None) is not None and st.user.is_logged_in:
                 st.logout()
         except Exception:
             pass
