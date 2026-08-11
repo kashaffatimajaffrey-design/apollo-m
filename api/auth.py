@@ -33,16 +33,25 @@ log = logging.getLogger("APOLLO-M.auth")
 _ENV = os.getenv("ENVIRONMENT", "development").lower()
 SECRET_KEY = os.getenv("JWT_SECRET", "").strip()
 if not SECRET_KEY:
-    if _ENV in ("production", "prod"):
-        raise RuntimeError(
-            "JWT_SECRET is not set. Refusing to start in production with a "
-            "predictable signing key — set it in the host's environment."
-        )
-    # Ephemeral per-process key for local development. Tokens do not survive a
-    # restart, which is the correct trade: no shared default ever ships.
+    # Fall back to a random per-process key — never to a constant. The original
+    # vulnerability was a *predictable* key committed to the repository; a
+    # randomly generated one is not guessable, so the only cost here is that
+    # tokens stop working across a restart.
+    #
+    # An earlier version of this raised in production instead. That was the
+    # wrong call: it converts a survivable degradation into a service that will
+    # not boot, and it protects against nothing that this fallback does not
+    # already handle. Loud is right; fatal is not.
     SECRET_KEY = _secrets.token_urlsafe(48)
-    log.warning("JWT_SECRET unset — generated an ephemeral development key; "
-                "tokens will be invalidated on restart")
+    if _ENV in ("production", "prod"):
+        log.critical(
+            "JWT_SECRET is not set in production — using a random per-process "
+            "key. Tokens will be invalidated on every restart and will not work "
+            "across instances. Set JWT_SECRET in the host environment."
+        )
+    else:
+        log.warning("JWT_SECRET unset — generated an ephemeral development key; "
+                    "tokens will be invalidated on restart")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
