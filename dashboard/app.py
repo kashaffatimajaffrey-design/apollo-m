@@ -49,6 +49,18 @@ def _secrets_to_env() -> None:
 
 _secrets_to_env()
 
+# Where the deployed services live. The sidebar previously linked to
+# http://localhost:3000 / :9090 / :8010 unconditionally, so on the hosted
+# dashboard every one of those buttons led a visitor to a connection error on
+# their own machine. Anything with a public URL now points at it; anything that
+# genuinely only exists locally is shown only when a URL is supplied.
+import os as _os
+
+API_URL = _os.getenv("APOLLO_API_URL", "https://apollo-api-tllm.onrender.com").rstrip("/")
+CEREBRO_URL = _os.getenv("CEREBRO_URL", "https://cerebro-sandy-beta.vercel.app").rstrip("/")
+GRAFANA_URL = _os.getenv("GRAFANA_URL", "").rstrip("/")        # blank => hidden
+PROMETHEUS_URL = _os.getenv("PROMETHEUS_URL", "").rstrip("/")  # blank => hidden
+
 st.markdown("""
 <style>
 .stApp { background:
@@ -180,11 +192,13 @@ with st.sidebar:
                              "but needs `ollama serve` + a pulled model running.")
     st.divider()
     st.markdown("**Connected systems**")
-    st.link_button("🛰️ Open CEREBRO", "https://cerebro-sandy-beta.vercel.app",
+    st.link_button("🛰️ Open CEREBRO", CEREBRO_URL,
                    use_container_width=True)
-    st.link_button("📊 Grafana", "http://localhost:3000", use_container_width=True)
-    st.link_button("📈 Prometheus", "http://localhost:9090", use_container_width=True)
-    st.link_button("🔌 API docs", "http://localhost:8010/docs", use_container_width=True)
+    st.link_button("🔌 API docs", f"{API_URL}/docs", use_container_width=True)
+    if GRAFANA_URL:
+        st.link_button("📊 Grafana", GRAFANA_URL, use_container_width=True)
+    if PROMETHEUS_URL:
+        st.link_button("📈 Prometheus", PROMETHEUS_URL, use_container_width=True)
     st.divider()
     # Explicit key so this can never collide with another identically-configured
     # button during a rerun (StreamlitDuplicateElementId). st.user is guarded
@@ -425,33 +439,83 @@ elif page == "🔴 Live":
 
 elif page == "Monitoring":
     st.subheader("Monitoring")
-    st.markdown("Metrics flow: **exporter (:9100) → Prometheus (:9090) → Grafana (:3000)**.")
-    c = st.columns(2)
-    c[0].link_button("📊 Open Grafana dashboard", "http://localhost:3000", use_container_width=True)
-    c[1].link_button("📈 Open Prometheus (PromQL)", "http://localhost:9090", use_container_width=True)
-    st.info("**Grafana login:** username `admin`, password `admin` — Grafana has its own login "
-            "(not your Google account). It'll ask you to set a new password on first sign-in.")
-    st.markdown("**Don't know PromQL? Try these** — paste one into the Prometheus query box and press "
-                "**Execute**:")
-    for q, desc in {
-        "apollo_avg_chi": "Average Community Health Index (0–100)",
-        "apollo_critical_alerts": "How many communities are CRITICAL right now",
-        "apollo_avg_toxicity": "Mean toxicity across communities",
-        "apollo_communities_total": "Communities analysed",
-        "apollo_toxicity_f1_micro": "Toxicity classifier F1 (micro)",
-        "apollo_forecast_p50_day1": "Day-1 median toxicity forecast",
-    }.items():
-        st.markdown(f"- `{q}` — {desc}")
-    st.caption("Grafana's APOLLO-M dashboard already charts all of these — no query typing needed there.")
-    st.markdown("**Live exporter output** (what Prometheus scrapes):")
+    # The metrics are rendered here directly rather than only linked to. The page
+    # used to consist of buttons to localhost:3000 and localhost:9090, which on a
+    # hosted dashboard sent every visitor to a connection error on their own
+    # machine -- the monitoring section was invisible to everyone but the operator.
+    # These are the same series the Prometheus exporter publishes, read from the
+    # pipeline outputs, so the page is meaningful wherever it is served.
+    st.markdown("These are the metrics APOLLO-M publishes. The same series are "
+                "exported to Prometheus and charted in Grafana for operations; "
+                "they are rendered here so the dashboard is self-contained.")
+
+    mrow = st.columns(4)
+    n_comm = len(meso) if not meso.empty else 0
+    crit = int((meso["alert"] == "CRITICAL").sum()) if not meso.empty else 0
+    mrow[0].metric("apollo_communities_total", n_comm)
+    mrow[1].metric("apollo_critical_alerts", crit)
+    mrow[2].metric("apollo_avg_chi",
+                   f"{meso['community_health_index'].mean():.1f}" if not meso.empty else "-")
+    mrow[3].metric("apollo_avg_toxicity",
+                   f"{meso['toxicity_rate'].mean():.3f}" if not meso.empty else "-")
+
     try:
-        import requests
-        m = requests.get("http://localhost:9100/metrics", timeout=3).text
-        rows = [l for l in m.splitlines() if l.startswith("apollo_") and not l.startswith("apollo_")==False]
-        st.code("\n".join([l for l in m.splitlines() if l.startswith("apollo_")]) or "no apollo metrics",
-                language="text")
+        _m = json.loads((OUTPUTS / "metrics.json").read_text())
+        tox = _m.get("Toxicity (TF-IDF+LR, Jigsaw)", {})
+        r2 = st.columns(4)
+        r2[0].metric("toxicity accuracy", tox.get("accuracy", "-"))
+        r2[1].metric("apollo_toxicity_f1_micro", tox.get("F1 micro", "-"))
+        r2[2].metric("apollo_toxicity_f1_macro", tox.get("F1 macro", "-"))
+        fp = float(forecast["p50"].iloc[0]) if not forecast.empty and "p50" in forecast else None
+        r2[3].metric("apollo_forecast_p50_day1", f"{fp:.3f}" if fp is not None else "-")
     except Exception:
-        st.info("**Monitoring runs locally.** Prometheus scrapes the exporter on "
-                "`localhost:9100` and Grafana renders it on `localhost:3000`; "
-                "neither is reachable from a hosted page. Start them with "
-                "`python monitoring/exporter.py` to see this section populate.")
+        pass
+
+    st.markdown("**Model status** — modules are marked unevaluated rather than "
+                "given a number they never earned:")
+    try:
+        _m = json.loads((OUTPUTS / "metrics.json").read_text())
+        st.json({k: v for k, v in _m.items()}, expanded=False)
+    except Exception:
+        st.caption("outputs/metrics.json not found.")
+
+    try:
+        _v = json.loads((OUTPUTS / "validation.json").read_text())
+        st.markdown("**Validation against planted ground truth** "
+                    "(`outputs/validation.json`):")
+        vcol = st.columns(3)
+        vcol[0].metric("instability score ROC-AUC",
+                       _v["detection"]["instability_score_roc_auc"])
+        vcol[1].metric("CHI ROC-AUC", _v["detection"]["chi_roc_auc"])
+        vcol[2].metric("TFT slope ROC-AUC", _v["forecast_tft"]["slope_roc_auc"])
+        st.caption(_v.get("caveat", ""))
+    except Exception:
+        pass
+
+    st.divider()
+    st.markdown("**Operations stack**")
+    if GRAFANA_URL or PROMETHEUS_URL:
+        oc = st.columns(2)
+        if GRAFANA_URL:
+            oc[0].link_button("Open Grafana", GRAFANA_URL, use_container_width=True)
+        if PROMETHEUS_URL:
+            oc[1].link_button("Open Prometheus", PROMETHEUS_URL, use_container_width=True)
+    else:
+        st.caption(
+            "Prometheus and Grafana run as an operations stack alongside the pipeline: "
+            "the exporter publishes the metrics above on :9100, Prometheus scrapes and "
+            "stores their history, and Grafana charts them with alerting. They are "
+            "infrastructure for whoever operates the system rather than a public page, "
+            "so no link is shown here. Set GRAFANA_URL and PROMETHEUS_URL to expose a "
+            "hosted instance.")
+    with st.expander("PromQL queries used by the Grafana dashboard"):
+        for q, desc in {
+            "apollo_avg_chi": "Average Community Health Index (0-100)",
+            "apollo_critical_alerts": "Communities currently CRITICAL",
+            "apollo_avg_toxicity": "Mean toxicity across communities",
+            "apollo_communities_total": "Communities analysed",
+            "apollo_toxicity_f1_micro": "Toxicity classifier F1 (micro)",
+            "apollo_forecast_p50_day1": "Day-1 median toxicity forecast",
+            "apollo_rising_communities": "Communities whose recent toxicity exceeds baseline",
+        }.items():
+            st.markdown(f"- `{q}` — {desc}")
