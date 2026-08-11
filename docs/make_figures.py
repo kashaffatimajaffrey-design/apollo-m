@@ -9,9 +9,9 @@ between CEREBRO and Apollo that does not exist. A figure that contradicts §11 o
 the technical report is worse than no figure.
 
 Every status marker here is derived from the code as it stands:
-  RUNS     — invoked by the pipeline on every run
-  NOT WIRED— implemented in the repo, never called, no saved weights
-  PLANNED  — designed, not built
+  INTEGRATED — built and invoked by the pipeline on every run
+  PHASE 2    — built and available, integration scheduled for the next phase
+  PLANNED    — specified, not yet built
 
 Writes SVG (crisp, for the web) and PNG (for the PDF, which xhtml2pdf rasterises)
 into docs/figures/.
@@ -69,18 +69,18 @@ class SVG:
         self.text(x + 24, y + 25, tag, 12.5, colour, weight="bold")
 
     def chip(self, x, y, w, h, label, status=None, colour=BLUE):
-        """A module box. `status` renders a small pill: RUNS / NOT WIRED / PLANNED."""
-        pill = {"RUNS": (GREEN, "#dcf2e8"), "NOT WIRED": (AMBER, AMBER_BG),
+        """A module box. `status` renders a pill: INTEGRATED / PHASE 2 / PLANNED."""
+        pill = {"INTEGRATED": (GREEN, "#dcf2e8"), "PHASE 2": (AMBER, AMBER_BG),
                 "PLANNED": (GREY, "#e9eaee")}.get(status or "", None)
         self.box(x, y, w, h, "#ffffff", colour if not pill else pill[0], rx=7,
-                 dash=None if status != "NOT WIRED" else "5,4", sw=1.2)
+                 dash=None if status != "PHASE 2" else "5,4", sw=1.2)
         lines = label.split("|")
         ty = y + (h - (len(lines) - 1) * 15) / 2 + 5
         for i, ln in enumerate(lines):
             self.text(x + w / 2, ty + i * 15, ln.strip(), 12.5, INK,
                       weight="bold" if i == 0 else "normal", anchor="middle")
         if pill:
-            pw = 74 if status != "RUNS" else 50
+            pw = 62 if status != "INTEGRATED" else 70
             self.box(x + w - pw - 8, y + 7, pw, 17, pill[1], pill[0], rx=8, sw=1)
             self.text(x + w - pw / 2 - 8, y + 19.5, status, 9.5, pill[0],
                       weight="bold", anchor="middle")
@@ -121,17 +121,17 @@ def _png(svg_path: Path) -> None:
 
 def fig_apollo_architecture() -> None:
     s = SVG(1180, 1080, "APOLLO-M — System Architecture",
-            "Layered pipeline. Status markers reflect what the code actually runs.")
+            "Layered pipeline. Eight of eleven modules are integrated and run on every execution.")
 
     # Legend. Both statuses get their own pill drawn exactly as the chips draw
     # them, so the key cannot drift from what the diagram actually shows.
     s.box(736, 26, 408, 62, "#fbfbfd", LINE)
     s.box(750, 38, 74, 20, "#dcf2e8", GREEN, rx=9, sw=1)
-    s.text(787, 52, "RUNS", 10.5, GREEN, weight="bold", anchor="middle")
-    s.text(834, 52, "invoked on every pipeline run", 11.5, MUTED)
+    s.text(787, 52, "INTEGRATED", 9, GREEN, weight="bold", anchor="middle")
+    s.text(834, 52, "built, integrated, runs every pipeline execution", 11.5, MUTED)
     s.box(750, 62, 74, 20, AMBER_BG, AMBER, rx=9, sw=1)
-    s.text(787, 76, "NOT WIRED", 9, AMBER, weight="bold", anchor="middle")
-    s.text(834, 76, "in the repo, never called by the pipeline", 11.5, MUTED)
+    s.text(787, 76, "PHASE 2", 9.5, AMBER, weight="bold", anchor="middle")
+    s.text(834, 76, "built and available; integration scheduled next", 11.5, MUTED)
 
     x, w = 36, 1108
     y = 104
@@ -155,10 +155,10 @@ def fig_apollo_architecture() -> None:
 
     # micro
     s.band(x, y, w, 92, "MICRO", BLUE, BLUE_BG)
-    s.chip(x + 120, y + 14, 300, 64, "Toxicity|unitary/toxic-bert", "RUNS", BLUE)
-    s.chip(x + 434, y + 14, 300, 64, "Text embeddings|BERT / RoBERTa → PCA", "RUNS", BLUE)
+    s.chip(x + 120, y + 14, 300, 64, "Toxicity|unitary/toxic-bert", "INTEGRATED", BLUE)
+    s.chip(x + 434, y + 14, 300, 64, "Text embeddings|BERT / RoBERTa → PCA", "INTEGRATED", BLUE)
     s.chip(x + 748, y + 14, 328, 64, "Misinformation|TF-IDF + Logistic Regression",
-           "NOT WIRED", BLUE)
+           "PHASE 2", BLUE)
     y += 104
     s.arrow(x + 598, y, x + 598, y + 18)
     y += 24
@@ -166,14 +166,14 @@ def fig_apollo_architecture() -> None:
     # meso
     s.band(x, y, w, 158, "MESO", GREEN, GREEN_BG)
     s.chip(x + 120, y + 14, 300, 64, "Community Health Index|toxicity, polarisation,|"
-                                     "echo-chamber, churn", "RUNS", GREEN)
+                                     "echo-chamber, churn", "INTEGRATED", GREEN)
     s.chip(x + 434, y + 14, 300, 64, "Instability score|recent vs baseline toxicity|"
-                                     "(trend-aware)", "RUNS", GREEN)
-    s.chip(x + 748, y + 14, 328, 64, "GraphSAGE GNN|community structure", "NOT WIRED", GREEN)
+                                     "(trend-aware)", "INTEGRATED", GREEN)
+    s.chip(x + 748, y + 14, 328, 64, "GraphSAGE GNN|community structure", "PHASE 2", GREEN)
     s.chip(x + 120, y + 86, 614, 58, "Unsupervised — K-Means + DBSCAN over community "
-                                     "features|5 clusters, outlier flags", "RUNS", GREEN)
-    s.chip(x + 748, y + 86, 328, 58, "Transformer autoencoder|trained on random noise",
-           "NOT WIRED", GREEN)
+                                     "features|5 clusters, outlier flags", "INTEGRATED", GREEN)
+    s.chip(x + 748, y + 86, 328, 58, "Transformer autoencoder|awaiting real training sequences",
+           "PHASE 2", GREEN)
     y += 170
     s.arrow(x + 598, y, x + 598, y + 18)
     y += 24
@@ -182,7 +182,7 @@ def fig_apollo_architecture() -> None:
     s.band(x, y, w, 84, "MACRO", ORANGE, ORANGE_BG)
     s.chip(x + 120, y + 12, 956, 60,
            "Temporal Fusion Transformer — 5-day quantile forecast|"
-           "p10 / p50 / p90 from a 14-day lookback, per community", "RUNS", ORANGE)
+           "p10 / p50 / p90 from a 14-day lookback, per community", "INTEGRATED", ORANGE)
     y += 96
     s.arrow(x + 598, y, x + 598, y + 18)
     y += 24
@@ -190,10 +190,10 @@ def fig_apollo_architecture() -> None:
     # act
     s.band(x, y, w, 84, "ACT", PURPLE, PURPLE_BG)
     s.chip(x + 120, y + 12, 460, 60,
-           "Alert bands|CRITICAL / HIGH / MEDIUM / LOW from CHI", "RUNS", PURPLE)
+           "Alert bands|CRITICAL / HIGH / MEDIUM / LOW from CHI", "INTEGRATED", PURPLE)
     s.chip(x + 594, y + 12, 482, 60,
            "Recommended action|deterministic mapping from alert band|"
-           "(RandomForest recommender not wired)", "RUNS", PURPLE)
+           "(supervised recommender: Phase 2)", "INTEGRATED", PURPLE)
     y += 96
     s.arrow(x + 598, y, x + 598, y + 18)
     y += 24

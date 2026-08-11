@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="700" viewBox="0 0 1180 700" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="700" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — Database Design (ERD)</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">Tables as defined in database/schema.sql, in the apollo schema.</text>
+<rect x="60" y="110" width="250" height="160" rx="8" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.6"/>
+<rect x="60" y="110" width="250" height="28" rx="8" fill="#eaf1fd"/>
+<rect x="60" y="128" width="250" height="10" fill="#eaf1fd"/>
+<text x="185.0" y="129" font-size="12.5" fill="#1e5fbf" font-weight="bold" text-anchor="middle">communities</text>
+<text x="72" y="156" font-size="10" fill="#1e5fbf" font-weight="normal" text-anchor="start">◆</text>
+<text x="86" y="156" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="298" y="156" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="72" y="177" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="177" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="298" y="177" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR(100) UQ</text>
+<text x="72" y="198" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="198" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subscribers</text>
+<text x="298" y="198" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">INTEGER</text>
+<text x="72" y="219" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="219" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">posts_per_day</text>
+<text x="298" y="219" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="72" y="240" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="240" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">age_days</text>
+<text x="298" y="240" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">INTEGER</text>
+<text x="72" y="261" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="261" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">created_at</text>
+<text x="298" y="261" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">TIMESTAMP</text>
+<rect x="450" y="110" width="280" height="244" rx="8" fill="#ffffff" stroke="#12805c" stroke-width="1.6"/>
+<rect x="450" y="110" width="280" height="28" rx="8" fill="#e6f5ef"/>
+<rect x="450" y="128" width="280" height="10" fill="#e6f5ef"/>
+<text x="590.0" y="129" font-size="12.5" fill="#12805c" font-weight="bold" text-anchor="middle">community_health</text>
+<text x="462" y="156" font-size="10" fill="#12805c" font-weight="normal" text-anchor="start">◆</text>
+<text x="476" y="156" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="718" y="156" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="462" y="177" font-size="10" fill="#12805c" font-weight="normal" text-anchor="start">◇</text>
+<text x="476" y="177" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="718" y="177" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="462" y="198" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="198" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">community_health_index</text>
+<text x="718" y="198" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="219" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="219" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">toxicity_rate</text>
+<text x="718" y="219" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="240" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="240" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">polarization</text>
+<text x="718" y="240" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="261" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="261" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">echo_chamber_index</text>
+<text x="718" y="261" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="282" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="282" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">churn_rate</text>
+<text x="718" y="282" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="303" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="303" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">cluster</text>
+<text x="718" y="303" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">INTEGER</text>
+<text x="462" y="324" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="324" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">is_outlier</text>
+<text x="718" y="324" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">BOOLEAN</text>
+<text x="462" y="345" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="345" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">timestamp</text>
+<text x="718" y="345" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">TIMESTAMP</text>
+<rect x="850" y="110" width="270" height="202" rx="8" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.6"/>
+<rect x="850" y="110" width="270" height="28" rx="8" fill="#f0ebfd"/>
+<rect x="850" y="128" width="270" height="10" fill="#f0ebfd"/>
+<text x="985.0" y="129" font-size="12.5" fill="#5b3fbf" font-weight="bold" text-anchor="middle">alerts</text>
+<text x="862" y="156" font-size="10" fill="#5b3fbf" font-weight="normal" text-anchor="start">◆</text>
+<text x="876" y="156" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="1108" y="156" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="862" y="177" font-size="10" fill="#5b3fbf" font-weight="normal" text-anchor="start">◇</text>
+<text x="876" y="177" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="1108" y="177" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="862" y="198" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="198" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">alert_level</text>
+<text x="1108" y="198" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR(20)</text>
+<text x="862" y="219" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="219" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">chi</text>
+<text x="1108" y="219" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="862" y="240" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="240" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">message</text>
+<text x="1108" y="240" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">TEXT</text>
+<text x="862" y="261" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="261" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">toxicity</text>
+<text x="1108" y="261" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="862" y="282" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="282" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">polarization</text>
+<text x="1108" y="282" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="862" y="303" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="303" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">timestamp</text>
+<text x="1108" y="303" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">TIMESTAMP</text>
+<rect x="60" y="400" width="250" height="160" rx="8" fill="#ffffff" stroke="#c2610a" stroke-width="1.6"/>
+<rect x="60" y="400" width="250" height="28" rx="8" fill="#fdf1e3"/>
+<rect x="60" y="418" width="250" height="10" fill="#fdf1e3"/>
+<text x="185.0" y="419" font-size="12.5" fill="#c2610a" font-weight="bold" text-anchor="middle">toxicity_scores</text>
+<text x="72" y="446" font-size="10" fill="#c2610a" font-weight="normal" text-anchor="start">◆</text>
+<text x="86" y="446" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="298" y="446" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="72" y="467" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="467" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">comment_id</text>
+<text x="298" y="467" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="72" y="488" font-size="10" fill="#c2610a" font-weight="normal" text-anchor="start">◇</text>
+<text x="86" y="488" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="298" y="488" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="72" y="509" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="509" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">toxicity_score</text>
+<text x="298" y="509" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="72" y="530" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="530" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">is_toxic</text>
+<text x="298" y="530" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">BOOLEAN</text>
+<text x="72" y="551" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="86" y="551" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">created_utc</text>
+<text x="298" y="551" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">TIMESTAMP</text>
+<rect x="450" y="400" width="280" height="160" rx="8" fill="#ffffff" stroke="#c2610a" stroke-width="1.6"/>
+<rect x="450" y="400" width="280" height="28" rx="8" fill="#fdf1e3"/>
+<rect x="450" y="418" width="280" height="10" fill="#fdf1e3"/>
+<text x="590.0" y="419" font-size="12.5" fill="#c2610a" font-weight="bold" text-anchor="middle">forecasts</text>
+<text x="462" y="446" font-size="10" fill="#c2610a" font-weight="normal" text-anchor="start">◆</text>
+<text x="476" y="446" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="718" y="446" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="462" y="467" font-size="10" fill="#c2610a" font-weight="normal" text-anchor="start">◇</text>
+<text x="476" y="467" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="718" y="467" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="462" y="488" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="488" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">forecast_date</text>
+<text x="718" y="488" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">DATE</text>
+<text x="462" y="509" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="509" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">predicted_toxicity</text>
+<text x="718" y="509" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="462" y="530" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="530" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">risk_level</text>
+<text x="718" y="530" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR(20)</text>
+<text x="462" y="551" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="476" y="551" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">method</text>
+<text x="718" y="551" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR(50)</text>
+<rect x="850" y="400" width="270" height="139" rx="8" fill="#ffffff" stroke="#6b7280" stroke-width="1.6"/>
+<rect x="850" y="400" width="270" height="28" rx="8" fill="#f3f4f6"/>
+<rect x="850" y="418" width="270" height="10" fill="#f3f4f6"/>
+<text x="985.0" y="419" font-size="12.5" fill="#6b7280" font-weight="bold" text-anchor="middle">misinformation_scores</text>
+<text x="862" y="446" font-size="10" fill="#6b7280" font-weight="normal" text-anchor="start">◆</text>
+<text x="876" y="446" font-size="11" fill="#12142b" font-weight="bold" text-anchor="start">id</text>
+<text x="1108" y="446" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">SERIAL</text>
+<text x="862" y="467" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="467" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">comment_id</text>
+<text x="1108" y="467" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="862" y="488" font-size="10" fill="#6b7280" font-weight="normal" text-anchor="start">◇</text>
+<text x="876" y="488" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">subreddit</text>
+<text x="1108" y="488" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR</text>
+<text x="862" y="509" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="509" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">misinfo_score</text>
+<text x="1108" y="509" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">FLOAT</text>
+<text x="862" y="530" font-size="10" fill="#c9cee0" font-weight="normal" text-anchor="start">·</text>
+<text x="876" y="530" font-size="11" fill="#12142b" font-weight="normal" text-anchor="start">category</text>
+<text x="1108" y="530" font-size="10" fill="#5b6178" font-weight="normal" text-anchor="end">VARCHAR(50)</text>
+<line x1="310" y1="175" x2="448" y2="175" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="730" y1="175" x2="868" y2="175" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="185" y1="260" x2="185" y2="396" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="590" y1="290" x2="590" y2="396" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="985" y1="290" x2="985" y2="396" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="60" y="596" width="1060" height="76" rx="9" fill="#fdf6d8" stroke="#8a6d00" stroke-width="1.4"/>
+<text x="80" y="622" font-size="12" fill="#8a6d00" font-weight="bold" text-anchor="start">Note on population</text>
+<text x="80" y="645" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="start">community_health, alerts and forecasts are populated by every pipeline run. toxicity_scores and misinformation_scores</text>
+<text x="80" y="664" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="start">are defined but not yet written to — the per-comment persistence and the misinformation module are not wired (§11).</text>
+</svg>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="660" viewBox="0 0 1180 660" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="660" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — Sequence Diagram</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">A moderator opens a community drill-down and requests an explanation.</text>
+<rect x="22" y="106" width="176" height="38" rx="8" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.5"/>
+<text x="110" y="130" font-size="12.5" fill="#1e5fbf" font-weight="bold" text-anchor="middle">Moderator</text>
+<line x1="110" y1="146" x2="110" y2="566" stroke="#c9cee0" stroke-width="1.2" stroke-dasharray="4,4"/>
+<rect x="242" y="106" width="176" height="38" rx="8" fill="#ffffff" stroke="#12805c" stroke-width="1.5"/>
+<text x="330" y="130" font-size="12.5" fill="#12805c" font-weight="bold" text-anchor="middle">Dashboard</text>
+<line x1="330" y1="146" x2="330" y2="566" stroke="#c9cee0" stroke-width="1.2" stroke-dasharray="4,4"/>
+<rect x="462" y="106" width="176" height="38" rx="8" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.5"/>
+<text x="550" y="130" font-size="12.5" fill="#5b3fbf" font-weight="bold" text-anchor="middle">FastAPI</text>
+<line x1="550" y1="146" x2="550" y2="566" stroke="#c9cee0" stroke-width="1.2" stroke-dasharray="4,4"/>
+<rect x="682" y="106" width="176" height="38" rx="8" fill="#ffffff" stroke="#c2610a" stroke-width="1.5"/>
+<text x="770" y="130" font-size="12.5" fill="#c2610a" font-weight="bold" text-anchor="middle">PostgreSQL</text>
+<line x1="770" y1="146" x2="770" y2="566" stroke="#c9cee0" stroke-width="1.2" stroke-dasharray="4,4"/>
+<rect x="912" y="106" width="176" height="38" rx="8" fill="#ffffff" stroke="#6b7280" stroke-width="1.5"/>
+<text x="1000" y="130" font-size="12.5" fill="#6b7280" font-weight="bold" text-anchor="middle">Claude (LLM)</text>
+<line x1="1000" y1="146" x2="1000" y2="566" stroke="#c9cee0" stroke-width="1.2" stroke-dasharray="4,4"/>
+<line x1="120" y1="190" x2="320" y2="190" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="220.0" y="182" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">select community</text>
+<line x1="340" y1="226" x2="540" y2="226" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="440.0" y="218" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">GET /communities/{sub}  (JWT)</text>
+<line x1="560" y1="262" x2="760" y2="262" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="660.0" y="254" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">SELECT … FROM community_health</text>
+<line x1="760" y1="298" x2="560" y2="298" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="660.0" y="290" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">row: CHI, toxicity, churn, cluster</text>
+<line x1="540" y1="334" x2="340" y2="334" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="440.0" y="326" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">200 JSON + model_versions</text>
+<line x1="340" y1="380" x2="990" y2="380" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="665.0" y="372" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">explain(metrics)  — narration only</text>
+<line x1="990" y1="416" x2="340" y2="416" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="665.0" y="408" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">analyst briefing text</text>
+<line x1="320" y1="452" x2="120" y2="452" stroke="#12142b" stroke-width="1.8" marker-end="url(#a)"/>
+<text x="220.0" y="444" font-size="11" fill="#12142b" font-weight="normal" text-anchor="middle">render metrics, forecast band, briefing</text>
+<rect x="60" y="496" width="1060" height="96" rx="9" fill="#f7f8fb" stroke="#c9cee0" stroke-width="1.4"/>
+<text x="80" y="524" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="start">The ordering encodes the project's governing principle</text>
+<text x="80" y="548" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">Every number reaching the user is read from storage before the language model is contacted. The LLM receives</text>
+<text x="80" y="568" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">already-computed metrics and returns prose; if it is unavailable a deterministic template is substituted and the</text>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="560" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — Process Model</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">Incremental-iterative development: each layer is built, measured, then integrated.</text>
+<rect x="60" y="130" width="196" height="132" rx="10" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.5"/>
+<text x="158.0" y="162" font-size="12.5" fill="#1e5fbf" font-weight="bold" text-anchor="middle">REQUIREMENTS</text>
+<text x="158.0" y="192" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Scope, datasets,</text>
+<text x="158.0" y="211" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">success criteria</text>
+<line x1="260" y1="196" x2="282" y2="196" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="286" y="130" width="196" height="132" rx="10" fill="#f0ebfd" stroke="#5b3fbf" stroke-width="1.5"/>
+<text x="384.0" y="162" font-size="12.5" fill="#5b3fbf" font-weight="bold" text-anchor="middle">DESIGN</text>
+<text x="384.0" y="192" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Layer decomposition,</text>
+<text x="384.0" y="211" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">schema, interfaces</text>
+<line x1="486" y1="196" x2="508" y2="196" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="512" y="130" width="196" height="132" rx="10" fill="#e6f5ef" stroke="#12805c" stroke-width="1.5"/>
+<text x="610.0" y="162" font-size="12.5" fill="#12805c" font-weight="bold" text-anchor="middle">IMPLEMENT</text>
+<text x="610.0" y="192" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">One layer at a time,</text>
+<text x="610.0" y="211" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">micro → meso → macro</text>
+<line x1="712" y1="196" x2="734" y2="196" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="738" y="130" width="196" height="132" rx="10" fill="#fdf1e3" stroke="#c2610a" stroke-width="1.5"/>
+<text x="836.0" y="162" font-size="12.5" fill="#c2610a" font-weight="bold" text-anchor="middle">MEASURE</text>
+<text x="836.0" y="192" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Ground-truth validation,</text>
+<text x="836.0" y="211" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">held-out metrics</text>
+<line x1="938" y1="196" x2="960" y2="196" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="964" y="130" width="196" height="132" rx="10" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.5"/>
+<text x="1062.0" y="162" font-size="12.5" fill="#1e5fbf" font-weight="bold" text-anchor="middle">INTEGRATE</text>
+<text x="1062.0" y="192" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">API, dashboard,</text>
+<text x="1062.0" y="211" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">monitoring, deploy</text>
+<path d="M 1062.0 270 L 1062.0 316 L 158.0 316 L 158.0 276" fill="none" stroke="#5b6178" stroke-width="1.8" stroke-dasharray="6,5" marker-end="url(#a)"/>
+<text x="590" y="335" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="middle" font-style="italic">iterate — measurement feeds the next increment</text>
+<rect x="60" y="400" width="1060" height="108" rx="9" fill="#f7f8fb" stroke="#c9cee0" stroke-width="1.4"/>
+<text x="80" y="428" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="start">Why incremental rather than waterfall</text>
+<text x="80" y="452" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">Each layer produces a measurable artefact before the next depends on it, so a defect is caught in the layer that</text>
+<text x="80" y="472" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">introduced it. Three faults were found this way — a CHI scaling overflow, an alphabetically-biased sample, and a</text>
+<text x="80" y="492" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">health index that ranked communities worse than one of its own inputs.</text>
+</svg>

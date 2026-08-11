@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="640" viewBox="0 0 1180 640" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="640" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — Use Case Diagram</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">Actors and the operations available to each role.</text>
+<rect x="330" y="108" width="520" height="470" rx="14" fill="#fbfbfd" stroke="#c9cee0" stroke-width="1.5"/>
+<text x="590" y="136" font-size="13" fill="#5b6178" font-weight="bold" text-anchor="middle">APOLLO-M</text>
+<ellipse cx="590" cy="180" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="184" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">View community health dashboard</text>
+<ellipse cx="590" cy="232" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="236" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Inspect a community drill-down</text>
+<ellipse cx="590" cy="284" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="288" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">View 5-day toxicity forecast</text>
+<ellipse cx="590" cy="336" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="340" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Review alerts by severity</text>
+<ellipse cx="590" cy="388" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="392" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Read LLM-generated briefing</text>
+<ellipse cx="590" cy="440" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="444" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Explore community clusters</text>
+<ellipse cx="590" cy="492" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="496" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Watch live processing feed</text>
+<ellipse cx="590" cy="544" rx="228" ry="21" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.3"/>
+<text x="590" y="548" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">Run the pipeline / reload data</text>
+<circle cx="130" cy="210" r="15" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="225" x2="130" y2="258" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="112" y1="237" x2="148" y2="237" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="258" x2="116" y2="286" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="258" x2="144" y2="286" stroke="#1e5fbf" stroke-width="1.8"/>
+<text x="130" y="308" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Viewer</text>
+<text x="130" y="326" font-size="10.5" fill="#5b6178" font-weight="normal" text-anchor="middle">summary + alerts</text>
+<circle cx="130" cy="400" r="15" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="415" x2="130" y2="448" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="112" y1="427" x2="148" y2="427" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="448" x2="116" y2="476" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="130" y1="448" x2="144" y2="476" stroke="#1e5fbf" stroke-width="1.8"/>
+<text x="130" y="498" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Analyst</text>
+<text x="130" y="516" font-size="10.5" fill="#5b6178" font-weight="normal" text-anchor="middle">all read operations</text>
+<circle cx="1050" cy="300" r="15" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="1050" y1="315" x2="1050" y2="348" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="1032" y1="327" x2="1068" y2="327" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="1050" y1="348" x2="1036" y2="376" stroke="#1e5fbf" stroke-width="1.8"/>
+<line x1="1050" y1="348" x2="1064" y2="376" stroke="#1e5fbf" stroke-width="1.8"/>
+<text x="1050" y="398" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Admin</text>
+<text x="1050" y="416" font-size="10.5" fill="#5b6178" font-weight="normal" text-anchor="middle">read + pipeline control</text>
+<line x1="152" y1="240" x2="360" y2="198" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="240" x2="360" y2="250" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="240" x2="360" y2="302" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="198" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="250" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="302" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="354" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="406" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="458" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="152" y1="430" x2="360" y2="510" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="198" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="250" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="302" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="354" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="406" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="458" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="510" stroke="#c9cee0" stroke-width="1.2"/>
+<line x1="1028" y1="330" x2="820" y2="562" stroke="#c9cee0" stroke-width="1.2"/>
+<text x="590" y="606" font-size="11.5" fill="#5b6178" font-weight="normal" text-anchor="middle">Roles are enforced by the API through JWT claims (api/auth.py: viewer, analyst, admin).</text>
+</svg>
