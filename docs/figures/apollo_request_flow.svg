@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="620" viewBox="0 0 1180 620" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="620" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — Request Processing</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">How a request is served, and where the modelling actually happens.</text>
+<rect x="36" y="110" width="200" height="150" rx="10" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.5"/>
+<text x="136.0" y="138" font-size="13" fill="#1e5fbf" font-weight="bold" text-anchor="middle">1. REQUEST</text>
+<text x="136.0" y="168" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">Dashboard or client</text>
+<text x="136.0" y="187" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">calls the REST API</text>
+<line x1="239" y1="185" x2="257" y2="185" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="260" y="110" width="200" height="150" rx="10" fill="#e6f5ef" stroke="#12805c" stroke-width="1.5"/>
+<text x="360.0" y="138" font-size="13" fill="#12805c" font-weight="bold" text-anchor="middle">2. AUTH</text>
+<text x="360.0" y="168" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">FastAPI validates</text>
+<text x="360.0" y="187" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">the JWT and role</text>
+<line x1="463" y1="185" x2="481" y2="185" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="484" y="110" width="200" height="150" rx="10" fill="#f0ebfd" stroke="#5b3fbf" stroke-width="1.5"/>
+<text x="584.0" y="138" font-size="13" fill="#5b3fbf" font-weight="bold" text-anchor="middle">3. ROUTE</text>
+<text x="584.0" y="168" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">Dispatch to the</text>
+<text x="584.0" y="187" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">matching endpoint</text>
+<line x1="687" y1="185" x2="705" y2="185" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="708" y="110" width="200" height="150" rx="10" fill="#fdf1e3" stroke="#c2610a" stroke-width="1.5"/>
+<text x="808.0" y="138" font-size="13" fill="#c2610a" font-weight="bold" text-anchor="middle">4. READ</text>
+<text x="808.0" y="168" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">SELECT from PostgreSQL</text>
+<text x="808.0" y="187" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">(apollo schema)</text>
+<text x="808.0" y="206" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">no model runs here</text>
+<line x1="911" y1="185" x2="929" y2="185" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="932" y="110" width="200" height="150" rx="10" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.5"/>
+<text x="1032.0" y="138" font-size="13" fill="#1e5fbf" font-weight="bold" text-anchor="middle">5. RESPOND</text>
+<text x="1032.0" y="168" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">JSON with values,</text>
+<text x="1032.0" y="187" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">model versions</text>
+<text x="1032.0" y="206" font-size="12" fill="#12142b" font-weight="normal" text-anchor="middle">and provenance</text>
+<rect x="36" y="288" width="1108" height="56" rx="8" fill="#fdf6d8" stroke="#8a6d00" stroke-width="1.4"/>
+<text x="56" y="312" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">The API performs no inference. Every score, forecast and alert is computed offline by the pipeline below and read back as a stored value,</text>
+<text x="56" y="331" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">so a request costs a database read rather than a model load — which is why the deployed service needs no PyTorch.</text>
+<text x="36" y="380" font-size="13.5" fill="#12142b" font-weight="bold" text-anchor="start">OFFLINE PIPELINE — run separately, then loaded into PostgreSQL</text>
+<rect x="36" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="122.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">simulate_data.py</text>
+<line x1="210" y1="420" x2="221" y2="420" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="223" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="309.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">micro — toxic-bert</text>
+<line x1="397" y1="420" x2="408" y2="420" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="410" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="496.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">meso — CHI + instability</text>
+<line x1="584" y1="420" x2="595" y2="420" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="597" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="683.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">TFT forecast</text>
+<line x1="771" y1="420" x2="782" y2="420" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="784" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="870.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">outputs/*.csv</text>
+<line x1="958" y1="420" x2="969" y2="420" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="971" y="396" width="172" height="48" rx="7" fill="#ffffff" stroke="#6b7280" stroke-width="1.2"/>
+<text x="1057.0" y="425" font-size="11.5" fill="#12142b" font-weight="normal" text-anchor="middle">db_setup.py → PostgreSQL</text>
+<rect x="36" y="476" width="1108" height="92" rx="9" fill="#f7f8fb" stroke="#c9cee0" stroke-width="1.4"/>
+<text x="56" y="504" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="start">Two things this diagram deliberately does not claim:</text>
+<text x="56" y="528" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">•  No WebSocket. The Streamlit dashboard polls files and the database; Apollo has no push channel (CEREBRO does).</text>
+<text x="56" y="550" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">•  No live Reddit feed. Reddit's API is closed to the project, so the Live page replays the scored corpus client-side.</text>
+</svg>

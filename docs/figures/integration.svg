@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" font-family="Helvetica,Arial,sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
+<rect width="1180" height="760" fill="#ffffff"/>
+<text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">CEREBRO + APOLLO-M — Integration</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">What is deployed today, and what is designed but not yet built.</text>
+<rect x="36" y="104" width="400" height="400" rx="12" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.8"/>
+<text x="236" y="136" font-size="19" fill="#1e5fbf" font-weight="bold" text-anchor="middle">CEREBRO</text>
+<text x="236" y="158" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="middle">per-item verdicts, on demand</text>
+<rect x="56" y="176" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="200" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Email forensics</text>
+<rect x="56" y="224" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="248" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">News / claim verification (RAG)</text>
+<rect x="56" y="272" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="296" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Network anomaly detection</text>
+<rect x="56" y="320" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="344" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">URL &amp; source reputation</text>
+<rect x="56" y="368" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="392" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Published fact-check lookup</text>
+<rect x="56" y="416" width="360" height="38" rx="7" fill="#ffffff" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="236" y="440" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">LLM explanation (Claude)</text>
+<rect x="744" y="104" width="400" height="400" rx="12" fill="#e6f5ef" stroke="#12805c" stroke-width="1.8"/>
+<text x="944" y="136" font-size="19" fill="#12805c" font-weight="bold" text-anchor="middle">APOLLO-M</text>
+<text x="944" y="158" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="middle">per-community forecasts, over time</text>
+<rect x="764" y="176" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="200" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Toxicity scoring (toxic-bert)</text>
+<rect x="764" y="224" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="248" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Community Health Index</text>
+<rect x="764" y="272" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="296" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Instability score (trend)</text>
+<rect x="764" y="320" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="344" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Clustering &amp; outliers</text>
+<rect x="764" y="368" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="392" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">TFT 5-day forecast</text>
+<rect x="764" y="416" width="360" height="38" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.1"/>
+<text x="944" y="440" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">Alerts &amp; recommended actions</text>
+<rect x="462" y="150" width="256" height="190" rx="12" fill="#ffffff" stroke="#5b3fbf" stroke-width="1.8"/>
+<text x="590" y="178" font-size="12.5" fill="#5b3fbf" font-weight="bold" text-anchor="middle">SHARED</text>
+<text x="590" y="196" font-size="12.5" fill="#5b3fbf" font-weight="bold" text-anchor="middle">PostgreSQL instance</text>
+<text x="590" y="214" font-size="11.5" fill="#5b6178" font-weight="normal" text-anchor="middle">one Render database</text>
+<rect x="482" y="230" width="216" height="44" rx="7" fill="#eaf1fd" stroke="#1e5fbf" stroke-width="1.1"/>
+<text x="590" y="248" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">cerebro schema</text>
+<text x="590" y="265" font-size="11" fill="#5b6178" font-weight="normal" text-anchor="middle">20 tables</text>
+<rect x="482" y="282" width="216" height="44" rx="7" fill="#e6f5ef" stroke="#12805c" stroke-width="1.1"/>
+<text x="590" y="300" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">apollo schema</text>
+<text x="590" y="317" font-size="11" fill="#5b6178" font-weight="normal" text-anchor="middle">6 tables</text>
+<line x1="438" y1="240" x2="460" y2="240" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<line x1="742" y1="240" x2="720" y2="240" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
+<rect x="462" y="362" width="256" height="142" rx="12" fill="#ffffff" stroke="#6b7280" stroke-width="1.6" stroke-dasharray="6,5"/>
+<rect x="546" y="372" width="88" height="19" rx="9" fill="#e9eaee" stroke="#6b7280" stroke-width="1"/>
+<text x="590" y="385.5" font-size="10" fill="#6b7280" font-weight="bold" text-anchor="middle">PLANNED</text>
+<text x="590" y="412" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Intelligence exchange</text>
+<text x="590" y="434" font-size="11.5" fill="#5b6178" font-weight="normal" text-anchor="middle">CEREBRO misinformation</text>
+<text x="590" y="452" font-size="11.5" fill="#5b6178" font-weight="normal" text-anchor="middle">detections aggregated daily</text>
+<text x="590" y="470" font-size="11.5" fill="#5b6178" font-weight="normal" text-anchor="middle">→ TFT covariate for Apollo</text>
+<line x1="438" y1="430" x2="460" y2="430" stroke="#6b7280" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#a)"/>
+<line x1="742" y1="430" x2="720" y2="430" stroke="#6b7280" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#a)"/>
+<rect x="36" y="528" width="1108" height="64" rx="9" fill="#eef7f2" stroke="#12805c" stroke-width="1.5"/>
+<text x="56" y="554" font-size="12" fill="#12805c" font-weight="bold" text-anchor="start">DEPLOYED TODAY</text>
+<text x="196" y="553" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">One PostgreSQL instance serves both systems, schema-isolated and verified: Apollo's 6 tables loaded (60 communities,</text>
+<text x="196" y="573" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">60 alerts, 300 forecasts) alongside CEREBRO's 20, with CEREBRO's data untouched. Both APIs deployed on Render.</text>
+<rect x="36" y="606" width="1108" height="64" rx="9" fill="#f7f8fb" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6,5"/>
+<text x="56" y="632" font-size="12" fill="#6b7280" font-weight="bold" text-anchor="start">NOT YET BUILT</text>
+<text x="196" y="631" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">Apollo does not read CEREBRO's detections and CEREBRO does not call Apollo. Sharing an instance is infrastructure integration,</text>
+<text x="196" y="651" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="start">not intelligence exchange. The next step is the covariate above: each CEREBRO verdict becomes a daily misinformation-pressure signal.</text>
+<text x="36" y="700" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">Design rationale: CEREBRO answers "is this claim true?" for one item on demand; APOLLO-M answers "is this community</text>
+<text x="36" y="718" font-size="12" fill="#5b6178" font-weight="normal" text-anchor="start">destabilising?" for many communities over time. CEREBRO produces events; Apollo consumes time series. That is the join.</text>
+</svg>

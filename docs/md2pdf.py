@@ -41,6 +41,11 @@ blockquote { color: #5b21b6; font-style: italic; border-left: 3px solid #a78bfa;
              padding-left: 8pt; margin-left: 0; }
 hr { border: 0; border-top: 1px solid #dddddd; margin: 10pt 0; }
 code { background-color: #f3f4f6; font-family: Courier; font-size: 8.5pt; }
+/* Figures. xhtml2pdf ignores max-width, so widths are set per-image in the
+   markdown; this keeps them centred with a caption underneath. */
+img { margin: 6pt 0; }
+p img { display: block; }
+em { color: #4b5563; }
 """
 
 md = sanitize(SRC.read_text(encoding="utf-8"))
@@ -48,6 +53,9 @@ body = markdown.markdown(md, extensions=["tables", "fenced_code", "sane_lists"])
 html = f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body>{body}</body></html>"
 
 with open(OUT, "wb") as f:
-    result = pisa.CreatePDF(src=html, dest=f, encoding="utf-8")
+    # path= gives xhtml2pdf a base directory, without which the relative
+    # figures/*.png references resolve to nothing and the images silently vanish
+    # from the PDF while the markdown still looks correct.
+    result = pisa.CreatePDF(src=html, dest=f, encoding="utf-8", path=str(HERE) + "/")
 
 print("PDF error" if result.err else f"OK -> {OUT} ({OUT.stat().st_size/1024:.0f} KB)")

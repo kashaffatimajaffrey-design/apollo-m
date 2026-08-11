@@ -68,6 +68,13 @@ Toxicity, misinformation, CHI, clusters, anomalies and forecasts are all produce
 
 ## 3. System Architecture
 
+![APOLLO-M system architecture](figures/apollo_architecture.png){width=100%}
+
+*Figure 1 — The layered pipeline. Status markers are derived from the code
+rather than the design: **RUNS** marks a stage invoked on every pipeline run,
+**NOT WIRED** marks a module that exists in the repository but is never called
+(§11). The validation row reports measurement against planted ground truth (§12).*
+
 Apollo-M is a **layered pipeline** feeding a persistence + serving + visualisation stack:
 
 | Layer | Responsibility |
@@ -172,6 +179,13 @@ not yet wired into the pipeline.)*
 
 ## 6. Data & Persistence
 
+![APOLLO-M request processing](figures/apollo_request_flow.png){width=100%}
+
+*Figure 2 — Serving is deliberately separated from modelling. The API answers
+from stored values and performs no inference, which is why the deployed service
+installs no PyTorch; the pipeline that produces those values runs offline and
+loads its results into PostgreSQL.*
+
 Every pipeline run writes to PostgreSQL — the same instance CEREBRO uses (§10). Key tables:
 
 | Table | Stores |
@@ -262,6 +276,13 @@ Running **locally**, end-to-end, right now:
 ---
 
 ## 9. Integration with CEREBRO
+
+![CEREBRO and APOLLO-M integration](figures/integration.png){width=100%}
+
+*Figure 3 — What is deployed against what is designed. One PostgreSQL instance
+serves both systems with `cerebro` and `apollo` schemas side by side; the
+intelligence exchange between them is specified but not yet built, and is drawn
+dashed for that reason.*
 
 CEREBRO and Apollo-M are **two complementary intelligence systems on one platform**, connected by:
 
