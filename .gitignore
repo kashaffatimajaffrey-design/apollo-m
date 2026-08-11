@@ -51,3 +51,11 @@ outputs/community_health_report.csv
 outputs/toxicity_by_subreddit_daily.csv
 main_run.log
 *.log
+
+#   live_feed.csv / live_stats.json : rewritten continuously by
+#       ingest/live_replay.py while it runs, so tracking them means every git
+#       operation collides with the replay. The Live page reports "replay idle"
+#       when they are absent, which is the honest state on a deployment where
+#       the replay is not running.
+outputs/live_feed.csv
+outputs/live_stats.json
