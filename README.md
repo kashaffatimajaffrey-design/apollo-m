@@ -56,7 +56,7 @@ than assigning it a number. See §11 of the technical report.
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-train.txt   # full pipeline (torch, transformers, TFT)
 python simulate_data.py        # build the benchmark (~15 min; scores texts with toxic-bert)
 python regen_meso.py           # micro + meso + clustering -> outputs/
 python gen_forecasts.py        # train the TFT -> outputs/forecast_results.csv
@@ -66,10 +66,16 @@ python validate_simulation.py  # measure recovery -> outputs/validation.json
 Serving (no torch required — reads precomputed results):
 
 ```bash
-pip install -r requirements-serve.txt
+pip install -r requirements.txt
 uvicorn api.main:app --port 8010     # backend
 streamlit run dashboard/app.py       # dashboard
 ```
+
+| File | Installs | Used by |
+|---|---|---|
+| `requirements.txt` | dashboard + API, no ML | **Streamlit Cloud** (fixed filename) |
+| `requirements-api.txt` | API only | Render |
+| `requirements-train.txt` | full pipeline incl. torch | local training |
 
 Large corpora are not in the repository (~526 MB; see `.gitignore`). The SNAP
 Reddit hyperlink graph must be downloaded separately to recompute polarisation.

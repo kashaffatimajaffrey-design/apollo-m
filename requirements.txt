@@ -1,44 +1,46 @@
 # ─────────────────────────────────────────────
-# APOLLO-M Requirements
-# Install: pip install -r requirements.txt
+# APOLLO-M — dashboard / serving requirements.
+#
+# THIS FILE IS WHAT STREAMLIT COMMUNITY CLOUD INSTALLS. It looks for
+# `requirements.txt` by name and cannot be pointed at another file, so anything
+# the hosted dashboard needs has to be here — and anything it does not need is
+# pure cost. It previously carried torch, transformers, pytorch-forecasting and
+# lightning: several hundred megabytes the dashboard never imports, which made
+# every cold boot slow and failure-prone. Those moved to requirements-train.txt.
+#
+# To run the pipeline (toxic-bert, the TFT, the embedder, clustering):
+#     pip install -r requirements-train.txt
+#
+# To run only the dashboard or the API:
+#     pip install -r requirements.txt
 # ─────────────────────────────────────────────
 
 # Core
 numpy>=1.24.0
 pandas>=2.0.0
-scikit-learn>=1.3.0
-matplotlib>=3.7.0
-
-# Deep Learning
-torch>=2.0.0
-torchvision>=0.15.0
-
-# NLP / Text Embeddings (BERT / RoBERTa)
-transformers>=4.35.0
-tokenizers>=0.15.0
-datasets>=2.14.0
-huggingface-hub>=0.19.0
-
-# Time-Series Forecasting (TFT Macro Layer)
-pytorch-forecasting>=1.0.0
-pytorch-lightning>=2.0.0
-lightning>=2.0.0
-
-# Graph Analysis (Meso Layer)
-networkx>=3.1
-
-# Database
-psycopg2-binary>=2.9.0
 
 # Dashboard
 streamlit>=1.28.0
 plotly>=5.17.0
 
+# Google (OIDC) sign-in. st.login() raises StreamlitMissingAuthlibError without
+# it, and the dashboard hides the sign-in button when this import fails — so a
+# missing Authlib silently removes the feature rather than breaking the page.
+Authlib>=1.3.2
+
+# Database (the API; the dashboard reads CSVs)
+psycopg2-binary>=2.9.0
+
 # API
 fastapi>=0.104.0
 uvicorn>=0.24.0
 requests>=2.31.0
+python-multipart>=0.0.6
+python-jose[cryptography]>=3.3.0
+passlib>=1.7,<1.8
+
+# Explanation layer — the dashboard calls Claude directly.
+anthropic>=0.40.0
 
 # Utilities
 python-dotenv>=1.0.0
-tqdm>=4.66.0
