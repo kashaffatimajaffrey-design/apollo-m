@@ -1,0 +1,54 @@
+{
+  "source": "Arctic Shift (Pushshift successor) \u2014 public HTTP API, no key",
+  "comments_scored": 20501,
+  "subreddits": 6,
+  "authors": 14520,
+  "days_covered": 40,
+  "date_range": [
+    "2026-07-03",
+    "2026-08-11"
+  ],
+  "model": "unitary/toxic-bert",
+  "mean_toxicity_overall": 0.1018,
+  "toxic_rate_overall": 0.0912,
+  "per_community": {
+    "politics": {
+      "comments": 3760.0,
+      "authors": 2592.0,
+      "mean_toxicity": 0.1394,
+      "toxic_rate": 0.1255
+    },
+    "news": {
+      "comments": 3043.0,
+      "authors": 2373.0,
+      "mean_toxicity": 0.1291,
+      "toxic_rate": 0.1163
+    },
+    "worldnews": {
+      "comments": 3337.0,
+      "authors": 2643.0,
+      "mean_toxicity": 0.1039,
+      "toxic_rate": 0.0947
+    },
+    "technology": {
+      "comments": 3576.0,
+      "authors": 2757.0,
+      "mean_toxicity": 0.103,
+      "toxic_rate": 0.0962
+    },
+    "movies": {
+      "comments": 3579.0,
+      "authors": 2799.0,
+      "mean_toxicity": 0.0854,
+      "toxic_rate": 0.0754
+    },
+    "science": {
+      "comments": 3206.0,
+      "authors": 2308.0,
+      "mean_toxicity": 0.0465,
+      "toxic_rate": 0.0352
+    }
+  },
+  "between_community_spread": 0.0929,
+  "note": "Real Reddit comments, real authors, real timestamps, scored by the same micro layer the simulation uses. Demonstrates that only the ingestion adapter differs between the declared benchmark and live data; every layer above it is unchanged."
+}
