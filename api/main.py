@@ -62,6 +62,10 @@ app.add_middleware(
 DB_SCHEMA = os.getenv("DB_SCHEMA", "apollo")
 _SEARCH_PATH = f"-c search_path={DB_SCHEMA},public"
 
+# Anchored to this file, so CSV fallbacks resolve wherever the process is started.
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUTS = ROOT / "outputs"
+
 
 def get_db():
     # A single DATABASE_URL is how managed providers hand out credentials; the
@@ -265,11 +269,23 @@ def get_forecast(subreddit: str):
     """, (subreddit,))
 
     if not rows:
-        # Return forecast from CSV as fallback
-        forecast_path = Path("outputs/forecast_results.csv")
+        # CSV fallback. This previously loaded the file and returned EVERY row,
+        # so a request for one community answered with all 300 forecast rows of
+        # all 60 — labelled with the requested name. Silently serving another
+        # community's forecast is worse than returning nothing, so filter, and
+        # 404 when the community genuinely has no forecast.
+        forecast_path = OUTPUTS / "forecast_results.csv"
         if forecast_path.exists():
             df = pd.read_csv(forecast_path)
+            if "subreddit" in df.columns:
+                want = subreddit.lower().lstrip("r/")
+                df = df[df["subreddit"].astype(str).str.lower()
+                        .str.lstrip("r/") == want]
             rows = df.to_dict(orient="records")
+
+    if not rows:
+        raise HTTPException(status_code=404,
+                            detail=f"No forecast for {subreddit}")
 
     return {
         "subreddit": subreddit,
@@ -282,7 +298,12 @@ def get_forecast(subreddit: str):
 @app.get("/clusters")
 def get_clusters():
     """Get community cluster assignments."""
-    report_path = Path("outputs/community_health_report.csv")
+    # clusters_report.csv, not community_health_report.csv: the latter is a stale
+    # artifact from an older run describing communities that appear nowhere else,
+    # and it carries no cluster column at all — so this endpoint could only ever
+    # 404 or mislead. Paths are anchored to the repo root rather than the process
+    # working directory, which is not guaranteed to be the project root.
+    report_path = OUTPUTS / "clusters_report.csv"
     if not report_path.exists():
         raise HTTPException(status_code=404,
                             detail="Cluster data not available — run pipeline first")
@@ -311,7 +332,7 @@ def get_clusters():
 @app.get("/recommendations")
 def get_recommendations():
     """Get moderation recommendations for all communities."""
-    rec_path = Path("outputs/moderation_recommendations.csv")
+    rec_path = OUTPUTS / "moderation_recommendations.csv"
     if not rec_path.exists():
         raise HTTPException(status_code=404,
                             detail="Recommendations not available — run pipeline first")
@@ -326,7 +347,7 @@ def get_recommendation(subreddit: str):
     """Get moderation recommendation for a specific subreddit."""
     if not subreddit.startswith("r/"):
         subreddit = f"r/{subreddit}"
-    rec_path = Path("outputs/moderation_recommendations.csv")
+    rec_path = OUTPUTS / "moderation_recommendations.csv"
     if not rec_path.exists():
         raise HTTPException(status_code=404,
                             detail="Recommendations not available — run pipeline first")
