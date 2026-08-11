@@ -28,6 +28,7 @@ warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "data" / "reddit_live_sample.csv"
 DAILY = ROOT / "data" / "reddit_live_daily.csv"
+SCORED = ROOT / "data" / "reddit_live_scored.csv"
 SUMMARY = ROOT / "outputs" / "real_reddit_summary.json"
 
 
@@ -72,6 +73,9 @@ def main() -> None:
     daily["group_id"] = daily["subreddit"]
     DAILY.parent.mkdir(parents=True, exist_ok=True)
     daily.to_csv(DAILY, index=False)
+    # Per-comment scores are what the meso layer needs for churn and CHI;
+    # keeping only the daily aggregate stranded the real data at the chart.
+    df.to_csv(SCORED, index=False)
 
     per_sub = (df.groupby("subreddit")
                  .agg(comments=("id", "count"),
