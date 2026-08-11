@@ -1,0 +1,9 @@
+{
+  "classifier": "TF-IDF + LogisticRegression, trained on ISOT news articles",
+  "news_style_fake_detected": 2,
+  "news_style_fake_total": 2,
+  "news_style_real_correct": 2,
+  "news_style_real_total": 2,
+  "flagged_rate_on_social_corpus": 0.9952,
+  "conclusion": "Correct on news-style text; labels almost all short social posts as misinformation. Out-of-domain. A per-community rate is therefore not published; the classifier serves news/claim verification, which is CEREBRO's input domain."
+}
