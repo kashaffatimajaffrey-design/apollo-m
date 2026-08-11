@@ -25,8 +25,20 @@ CREATE TABLE IF NOT EXISTS community_health (
     cluster                 INTEGER,
     cluster_label           VARCHAR(50),
     is_outlier              BOOLEAN DEFAULT FALSE,
+    instability_score       FLOAT,
+    gnn_risk                FLOAT,
+    recommended_action      VARCHAR(40),
     timestamp               TIMESTAMP DEFAULT NOW()
 );
+
+-- CREATE TABLE IF NOT EXISTS leaves an existing table untouched, so a database
+-- created before these columns existed would silently keep the old shape and the
+-- API would serve a pipeline output it cannot see. Added explicitly so the
+-- schema file remains the single source of truth for both new and existing
+-- deployments.
+ALTER TABLE community_health ADD COLUMN IF NOT EXISTS instability_score  FLOAT;
+ALTER TABLE community_health ADD COLUMN IF NOT EXISTS gnn_risk           FLOAT;
+ALTER TABLE community_health ADD COLUMN IF NOT EXISTS recommended_action VARCHAR(40);
 
 -- ── Toxicity scores per comment ────────────────────────────
 CREATE TABLE IF NOT EXISTS toxicity_scores (

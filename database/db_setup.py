@@ -105,15 +105,29 @@ def load_data() -> None:
     for t in ("community_health", "alerts", "forecasts"):
         cur.execute(f"TRUNCATE {t} RESTART IDENTITY")
 
+    def _num(row, name):
+        """None rather than NaN — psycopg2 writes NaN as a float, not NULL."""
+        v = getattr(row, name, None)
+        return float(v) if v is not None and pd.notna(v) else None
+
     ch_rows = [(r.subreddit, float(r.community_health_index), float(r.toxicity_rate),
                 float(r.polarization), float(r.echo_chamber_index), float(r.churn_rate),
                 int(r.total_comments),
                 (int(r.cluster) if r.cluster is not None and pd.notna(r.cluster) else None),
-                bool(getattr(r, "is_outlier", False)) if pd.notna(getattr(r, "is_outlier", False)) else False)
+                bool(getattr(r, "is_outlier", False)) if pd.notna(getattr(r, "is_outlier", False)) else False,
+                # Carried through so the API serves what the pipeline computes.
+                # Without these the instability score, the GNN structural risk and
+                # the recommended action existed only in the CSV.
+                _num(r, "instability_score"),
+                _num(r, "gnn_risk"),
+                (str(r.recommended_action)
+                 if getattr(r, "recommended_action", None) is not None
+                 and pd.notna(getattr(r, "recommended_action", None)) else None))
                for r in meso.itertuples()]
     execute_values(cur,
         "INSERT INTO community_health (subreddit, community_health_index, toxicity_rate, "
-        "polarization, echo_chamber_index, churn_rate, total_comments, cluster, is_outlier) VALUES %s",
+        "polarization, echo_chamber_index, churn_rate, total_comments, cluster, is_outlier, "
+        "instability_score, gnn_risk, recommended_action) VALUES %s",
         ch_rows)
 
     al_rows = [(r.subreddit, band(r.community_health_index), float(r.community_health_index),
