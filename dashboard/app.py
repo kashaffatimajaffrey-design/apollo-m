@@ -211,33 +211,90 @@ def kpi_row():
                      unsafe_allow_html=True)
 
 
-@st.fragment(run_every="3s")
+@st.cache_data
+def _live_seed() -> pd.DataFrame:
+    try:
+        return pd.read_csv(OUTPUTS / "live_seed.csv")
+    except Exception:
+        return pd.DataFrame()
+
+
+def _hosted_stream():
+    """
+    Drive the live feed from the wall clock instead of a background process.
+
+    The page used to require `ingest/live_replay.py` running on the same machine,
+    so on the hosted dashboard it showed nothing — the one page whose whole point
+    is motion was the one page that could not move for anyone but the operator.
+
+    Position is derived from the current time, so every visitor sees the stream
+    advancing on their own device with no server-side state, no websocket and no
+    background worker. The comments and their toxicity scores are the real,
+    already-scored corpus rows; only the arrival timing is synthetic, which is
+    exactly what "replay" means and what the caption says.
+    """
+    import time as _time
+    seed = _live_seed()
+    if seed.empty:
+        return None, None
+    step = 2                                    # seconds per new comment
+    pos = int(_time.time() // step) % len(seed)
+    window = seed.iloc[max(0, pos - 250):pos + 1]        # rolling stats window
+    if window.empty:
+        window = seed.iloc[:1]
+    recent = window.tail(8).iloc[::-1].copy()
+    recent["ts"] = [
+        _time.strftime("%H:%M:%S", _time.localtime(_time.time() - i * step))
+        for i in range(len(recent))
+    ]
+    stats = {
+        "processed": pos + 1,
+        "rolling_toxic_rate": float(window["is_toxic"].mean()),
+        "rolling_avg_toxicity": float(window["toxicity"].mean()),
+        "hottest_community": (window.groupby("subreddit")["toxicity"].mean()
+                              .idxmax() if len(window) else "—"),
+        "updated": _time.strftime("%H:%M:%S"),
+    }
+    return stats, recent
+
+
+@st.fragment(run_every="2s")
 def live_panel():
     sp = OUTPUTS / "live_stats.json"
-    if not sp.exists():
-        # Says "local-only" rather than just "idle": on the hosted dashboard the
-        # replay is not running and never will be, so a bare "idle" reads as a
-        # fault instead of the documented design.
-        st.info("**Live replay runs locally.** This page streams the real corpus "
-                "through the pipeline in real time on the machine running "
-                "`python ingest/live_replay.py`. The hosted dashboard serves "
-                "precomputed results, so there is no live feed here.")
-        return
-    s = json.loads(sp.read_text())
+    hosted = False
+    if sp.exists():
+        s = json.loads(sp.read_text())
+        feed = None
+    else:
+        # No local replay running: stream the committed corpus slice instead, so
+        # the page works for every viewer rather than only for the operator.
+        s, feed = _hosted_stream()
+        hosted = True
+        if s is None:
+            st.info("Live feed unavailable — outputs/live_seed.csv is missing.")
+            return
     c = st.columns(4)
     c[0].metric("Processed", f"{s.get('processed', 0):,}")
     c[1].metric("Rolling toxic rate", f"{s.get('rolling_toxic_rate', 0):.0%}")
     c[2].metric("Rolling avg tox", f"{s.get('rolling_avg_toxicity', 0):.2f}")
     c[3].metric("Hottest", str(s.get("hottest_community") or "—"))
     try:
-        for _, r in pd.read_csv(OUTPUTS / "live_feed.csv").tail(8).iloc[::-1].iterrows():
+        rows = feed if feed is not None else \
+            pd.read_csv(OUTPUTS / "live_feed.csv").tail(8).iloc[::-1]
+        for _, r in rows.iterrows():
             col = "#ef4444" if r["is_toxic"] else "#22c55e"
-            st.markdown(f"<span style='color:{col}'>●</span> <b>{r['subreddit']}</b> "
+            sub = str(r["subreddit"])
+            sub = sub if sub.startswith("r/") else f"r/{sub}"
+            st.markdown(f"<span style='color:{col}'>●</span> <b>{sub}</b> "
                         f"<span style='color:#7c83b3'>[{r['ts']}]</span> tox={float(r['toxicity']):.2f} — "
                         f"{str(r['body'])[:110]}", unsafe_allow_html=True)
     except Exception:
         pass
-    st.caption(f"updated {s.get('updated', '')} · real corpus, real scores, live")
+    if hosted:
+        st.caption(f"updated {s.get('updated', '')} · replaying the scored corpus — "
+                   "comments and toxicity scores are real, arrival timing is simulated")
+    else:
+        st.caption(f"updated {s.get('updated', '')} · real corpus, real scores, live")
 
 
 # ── Pages ────────────────────────────────────────────────────────────────────
