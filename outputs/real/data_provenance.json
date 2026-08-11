@@ -1,0 +1,12 @@
+{
+  "active_dataset": "real Reddit via Arctic Shift",
+  "comments": 116853,
+  "communities_analysed": 24,
+  "authors": 68043,
+  "days": 41,
+  "date_range": [
+    "2026-07-02",
+    "2026-08-11"
+  ],
+  "note": "CHI, clusters, alerts and forecasts on every page are computed from this corpus. The declared simulation is retained solely for ground-truth validation, where the answer is known in advance."
+}

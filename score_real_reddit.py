@@ -40,26 +40,60 @@ def main() -> None:
 
     df = pd.read_csv(SRC)
     if a.limit:
-        # Sample evenly across communities so no subreddit dominates the cap.
-        df = df.groupby("subreddit", group_keys=False).head(
-            max(1, a.limit // df["subreddit"].nunique()))
+        # Even across communities and across time. groupby().apply() folds the
+        # grouping column into the index and loses it; building an index list
+        # keeps the frame intact.
+        per = max(1, a.limit // max(1, df["subreddit"].nunique()))
+        keep = []
+        for _, g in df.sort_values("created_utc").groupby("subreddit", sort=False):
+            step = max(1, len(g) // per)
+            keep.extend(g.index[::step][:per].tolist())
+        df = df.loc[keep].reset_index(drop=True)
+
     print(f"scoring {len(df):,} real Reddit comments "
           f"({df['subreddit'].nunique()} subreddits)...")
+
+    # A single null body is enough to abort the whole pass: pandas' string dtype
+    # preserves NA through astype(str), so it reaches the tokenizer as a
+    # non-string and raises after everything before it has already been scored.
+    # Coerce explicitly and drop what cannot be scored.
+    df = df.copy()
+    df["body"] = df["body"].fillna("").map(lambda v: v if isinstance(v, str) else str(v))
+    before = len(df)
+    df = df[df["body"].str.strip() != ""].reset_index(drop=True)
+    if before != len(df):
+        print(f"  dropped {before - len(df)} rows with no scoreable text")
 
     from transformers import pipeline
     clf = pipeline("text-classification", model="unitary/toxic-bert",
                    top_k=None, truncation=True, max_length=256)
 
-    texts = df["body"].astype(str).str.slice(0, 512).tolist()
-    scores, B = [], 64
-    for i in range(0, len(texts), B):
+    texts = df["body"].str.slice(0, 512).tolist()
+    B = 64
+    # Checkpointed: scoring this corpus takes the better part of an hour, and an
+    # unrecoverable failure at the end costs all of it. Partial scores are
+    # written periodically and reloaded on a re-run.
+    ckpt = ROOT / "data" / ".scoring_checkpoint.csv"
+    scores: list[float] = []
+    if ckpt.exists():
+        try:
+            done = pd.read_csv(ckpt)["toxicity_score"].tolist()
+            if len(done) <= len(texts):
+                scores = done
+                print(f"  resuming from checkpoint at {len(scores):,}")
+        except Exception:  # noqa: BLE001
+            pass
+
+    for i in range(len(scores), len(texts), B):
         for res in clf(texts[i:i + B], batch_size=B):
             d = {r["label"].lower(): r["score"] for r in res}
             scores.append(float(d.get("toxic", 0.0)))
-        if (i // B) % 20 == 0:
+        if (i // B) % 40 == 0:
             print(f"  {min(i + B, len(texts)):,}/{len(texts):,}", flush=True)
+            pd.DataFrame({"toxicity_score": scores}).to_csv(ckpt, index=False)
 
-    df["toxicity_score"] = scores
+    df["toxicity_score"] = scores[:len(df)]
+    ckpt.unlink(missing_ok=True)
     df["is_toxic"] = (df["toxicity_score"] >= 0.5).astype(int)
     df["date"] = pd.to_datetime(df["created_utc"], unit="s").dt.floor("D")
 

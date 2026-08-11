@@ -29,7 +29,13 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "outputs"
+# Which dataset the API, Grafana and Prometheus serve. The real corpus is the
+# default because those surfaces describe the running system; the benchmark
+# remains available in the dashboard and is what the validation figures measure.
+#   APOLLO_DATASET=benchmark  -> outputs/
+#   APOLLO_DATASET=real       -> outputs/real/   (default when present)
+_DS = os.getenv("APOLLO_DATASET", "real").lower()
+OUT = ROOT / "outputs" / "real" if _DS == "real" and (ROOT / "outputs" / "real" / "meso_report.csv").exists() else ROOT / "outputs"
 
 # When DATABASE_URL is set we are targeting a managed instance: connect straight
 # to it and skip provisioning. Otherwise fall back to the local shared-Postgres

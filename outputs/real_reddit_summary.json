@@ -1,54 +1,162 @@
 {
   "source": "Arctic Shift (Pushshift successor) \u2014 public HTTP API, no key",
-  "comments_scored": 20501,
-  "subreddits": 6,
-  "authors": 14520,
-  "days_covered": 40,
+  "comments_scored": 116853,
+  "subreddits": 24,
+  "authors": 68043,
+  "days_covered": 41,
   "date_range": [
-    "2026-07-03",
+    "2026-07-02",
     "2026-08-11"
   ],
   "model": "unitary/toxic-bert",
-  "mean_toxicity_overall": 0.1018,
-  "toxic_rate_overall": 0.0912,
+  "mean_toxicity_overall": 0.098,
+  "toxic_rate_overall": 0.0876,
   "per_community": {
+    "PublicFreakout": {
+      "comments": 3472.0,
+      "authors": 2584.0,
+      "mean_toxicity": 0.1939,
+      "toxic_rate": 0.1829
+    },
     "politics": {
-      "comments": 3760.0,
-      "authors": 2592.0,
-      "mean_toxicity": 0.1394,
-      "toxic_rate": 0.1255
+      "comments": 7510.0,
+      "authors": 4738.0,
+      "mean_toxicity": 0.1448,
+      "toxic_rate": 0.1317
     },
     "news": {
-      "comments": 3043.0,
-      "authors": 2373.0,
-      "mean_toxicity": 0.1291,
-      "toxic_rate": 0.1163
+      "comments": 5938.0,
+      "authors": 4427.0,
+      "mean_toxicity": 0.1338,
+      "toxic_rate": 0.1187
     },
-    "worldnews": {
-      "comments": 3337.0,
-      "authors": 2643.0,
-      "mean_toxicity": 0.1039,
-      "toxic_rate": 0.0947
+    "wallstreetbets": {
+      "comments": 3851.0,
+      "authors": 2031.0,
+      "mean_toxicity": 0.1319,
+      "toxic_rate": 0.1218
+    },
+    "atheism": {
+      "comments": 3873.0,
+      "authors": 2166.0,
+      "mean_toxicity": 0.1305,
+      "toxic_rate": 0.1146
+    },
+    "australia": {
+      "comments": 6230.0,
+      "authors": 3716.0,
+      "mean_toxicity": 0.1076,
+      "toxic_rate": 0.0961
     },
     "technology": {
-      "comments": 3576.0,
-      "authors": 2757.0,
-      "mean_toxicity": 0.103,
-      "toxic_rate": 0.0962
+      "comments": 7221.0,
+      "authors": 5129.0,
+      "mean_toxicity": 0.1071,
+      "toxic_rate": 0.1015
+    },
+    "nfl": {
+      "comments": 3663.0,
+      "authors": 2375.0,
+      "mean_toxicity": 0.1069,
+      "toxic_rate": 0.1007
+    },
+    "Conservative": {
+      "comments": 2729.0,
+      "authors": 931.0,
+      "mean_toxicity": 0.1068,
+      "toxic_rate": 0.0927
+    },
+    "worldnews": {
+      "comments": 6628.0,
+      "authors": 4837.0,
+      "mean_toxicity": 0.1065,
+      "toxic_rate": 0.0967
+    },
+    "nba": {
+      "comments": 3896.0,
+      "authors": 2514.0,
+      "mean_toxicity": 0.0997,
+      "toxic_rate": 0.0909
+    },
+    "canada": {
+      "comments": 4412.0,
+      "authors": 2179.0,
+      "mean_toxicity": 0.0936,
+      "toxic_rate": 0.0852
+    },
+    "soccer": {
+      "comments": 3769.0,
+      "authors": 2700.0,
+      "mean_toxicity": 0.091,
+      "toxic_rate": 0.0854
     },
     "movies": {
-      "comments": 3579.0,
-      "authors": 2799.0,
-      "mean_toxicity": 0.0854,
-      "toxic_rate": 0.0754
+      "comments": 7224.0,
+      "authors": 5352.0,
+      "mean_toxicity": 0.0886,
+      "toxic_rate": 0.0788
+    },
+    "AskReddit": {
+      "comments": 7768.0,
+      "authors": 6718.0,
+      "mean_toxicity": 0.0871,
+      "toxic_rate": 0.0749
+    },
+    "india": {
+      "comments": 5389.0,
+      "authors": 2672.0,
+      "mean_toxicity": 0.0843,
+      "toxic_rate": 0.0716
+    },
+    "Libertarian": {
+      "comments": 3109.0,
+      "authors": 1385.0,
+      "mean_toxicity": 0.082,
+      "toxic_rate": 0.0708
+    },
+    "unitedkingdom": {
+      "comments": 6706.0,
+      "authors": 3851.0,
+      "mean_toxicity": 0.0816,
+      "toxic_rate": 0.0716
+    },
+    "gaming": {
+      "comments": 7306.0,
+      "authors": 5388.0,
+      "mean_toxicity": 0.0774,
+      "toxic_rate": 0.0683
+    },
+    "changemyview": {
+      "comments": 3727.0,
+      "authors": 1567.0,
+      "mean_toxicity": 0.0584,
+      "toxic_rate": 0.0488
+    },
+    "books": {
+      "comments": 3918.0,
+      "authors": 2570.0,
+      "mean_toxicity": 0.0517,
+      "toxic_rate": 0.0403
     },
     "science": {
-      "comments": 3206.0,
-      "authors": 2308.0,
-      "mean_toxicity": 0.0465,
-      "toxic_rate": 0.0352
+      "comments": 4113.0,
+      "authors": 2856.0,
+      "mean_toxicity": 0.0473,
+      "toxic_rate": 0.0357
+    },
+    "philosophy": {
+      "comments": 2684.0,
+      "authors": 980.0,
+      "mean_toxicity": 0.0365,
+      "toxic_rate": 0.0324
+    },
+    "history": {
+      "comments": 1717.0,
+      "authors": 1123.0,
+      "mean_toxicity": 0.0296,
+      "toxic_rate": 0.0186
     }
   },
-  "between_community_spread": 0.0929,
+  "between_community_spread": 0.1643,
   "note": "Real Reddit comments, real authors, real timestamps, scored by the same micro layer the simulation uses. Demonstrates that only the ingestion adapter differs between the declared benchmark and live data; every layer above it is unchanged."
 }

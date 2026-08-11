@@ -13,15 +13,24 @@ warnings.filterwarnings("ignore")
 logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
 from models.tft_forecaster import TFTForecaster, TFTConfig  # noqa: E402
 
+import sys
+
+# --real forecasts the live Reddit corpus into outputs/real/ instead of the
+# benchmark, so both datasets keep their own forecasts and neither overwrites
+# the other. Same model, same horizon; only the input series differs.
+REAL = "--real" in sys.argv
 ROOT = Path(__file__).resolve().parent
-OUT = ROOT / "outputs"
+OUT = (ROOT / "outputs" / "real") if REAL else (ROOT / "outputs")
+DAILY_SRC = ROOT / "data" / ("apollo_daily_real.csv" if REAL else "apollo_daily.csv")
+OUT.mkdir(parents=True, exist_ok=True)
+print(f"forecasting {'REAL Reddit' if REAL else 'benchmark'} -> {OUT}")
 HORIZON, LOOKBACK = 5, 14
 
 # Reliable communities (from the meso layer) — bare names to match apollo_daily.
-meso = pd.read_csv(OUT / "meso_report.csv")
+meso = pd.read_csv(OUT / "meso_report.csv")  # dataset-specific
 targets = {s[2:] if s.startswith("r/") else s for s in meso["subreddit"].astype(str)}
 
-daily = pd.read_csv(ROOT / "data" / "apollo_daily.csv")
+daily = pd.read_csv(DAILY_SRC)
 daily["subreddit"] = daily["subreddit"].astype(str).str.replace(r"^r/", "", regex=True)
 d = daily[daily["subreddit"].isin(targets)].copy()
 counts = d.groupby("subreddit").size()
