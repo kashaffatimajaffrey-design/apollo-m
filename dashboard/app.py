@@ -58,8 +58,13 @@ import os as _os
 
 API_URL = _os.getenv("APOLLO_API_URL", "https://apollo-api-tllm.onrender.com").rstrip("/")
 CEREBRO_URL = _os.getenv("CEREBRO_URL", "https://cerebro-sandy-beta.vercel.app").rstrip("/")
-GRAFANA_URL = _os.getenv("GRAFANA_URL", "").rstrip("/")        # blank => hidden
-PROMETHEUS_URL = _os.getenv("PROMETHEUS_URL", "").rstrip("/")  # blank => hidden
+# Grafana and Prometheus default to the local ports because that is where they
+# actually run: the demo is presented from the machine hosting them, and there
+# the links open the real dashboards. They are shown with a note rather than
+# hidden, since a viewer on another device would otherwise wonder where the
+# monitoring layer went — "localhost" resolves to *their* machine, not ours.
+GRAFANA_URL = _os.getenv("GRAFANA_URL", "http://localhost:3000").rstrip("/")
+PROMETHEUS_URL = _os.getenv("PROMETHEUS_URL", "http://localhost:9090").rstrip("/")
 
 st.markdown("""
 <style>
@@ -194,11 +199,9 @@ with st.sidebar:
     st.markdown("**Connected systems**")
     st.link_button("🛰️ Open CEREBRO", CEREBRO_URL,
                    use_container_width=True)
+    st.link_button("📊 Grafana", GRAFANA_URL, use_container_width=True)
+    st.link_button("📈 Prometheus", PROMETHEUS_URL, use_container_width=True)
     st.link_button("🔌 API docs", f"{API_URL}/docs", use_container_width=True)
-    if GRAFANA_URL:
-        st.link_button("📊 Grafana", GRAFANA_URL, use_container_width=True)
-    if PROMETHEUS_URL:
-        st.link_button("📈 Prometheus", PROMETHEUS_URL, use_container_width=True)
     st.divider()
     # Explicit key so this can never collide with another identically-configured
     # button during a rerun (StreamlitDuplicateElementId). st.user is guarded
@@ -494,20 +497,37 @@ elif page == "Monitoring":
 
     st.divider()
     st.markdown("**Operations stack**")
-    if GRAFANA_URL or PROMETHEUS_URL:
-        oc = st.columns(2)
-        if GRAFANA_URL:
-            oc[0].link_button("Open Grafana", GRAFANA_URL, use_container_width=True)
-        if PROMETHEUS_URL:
-            oc[1].link_button("Open Prometheus", PROMETHEUS_URL, use_container_width=True)
-    else:
-        st.caption(
-            "Prometheus and Grafana run as an operations stack alongside the pipeline: "
-            "the exporter publishes the metrics above on :9100, Prometheus scrapes and "
-            "stores their history, and Grafana charts them with alerting. They are "
-            "infrastructure for whoever operates the system rather than a public page, "
-            "so no link is shown here. Set GRAFANA_URL and PROMETHEUS_URL to expose a "
-            "hosted instance.")
+    oc = st.columns(3)
+    oc[0].link_button("📊 Open Grafana dashboard", GRAFANA_URL, use_container_width=True)
+    oc[1].link_button("📈 Open Prometheus (PromQL)", PROMETHEUS_URL, use_container_width=True)
+    oc[2].link_button("🔎 Live /metrics endpoint", f"{API_URL}/metrics",
+                      use_container_width=True)
+    st.caption(
+        "Grafana and Prometheus run next to the pipeline on the machine that hosts it, "
+        "so the first two links open the real dashboards **on that machine**. The third "
+        "is public: the deployed API serves the same series in Prometheus exposition "
+        "format, so any Prometheus — including Grafana Cloud — can scrape it from "
+        "anywhere. Set GRAFANA_URL / PROMETHEUS_URL to point at a hosted instance.")
+    st.info("**Grafana login:** username `admin` — Grafana keeps its own account, "
+            "separate from this dashboard and from Google.")
+
+    # Show the exposition text inline as well, so the scrape target is visible
+    # without leaving the page.
+    try:
+        import requests as _rq
+        _txt = _rq.get(f"{API_URL}/metrics", timeout=8).text
+        with st.expander("Live scrape output (Prometheus exposition format)", expanded=False):
+            st.code(_txt, language="text")
+    except Exception:
+        st.caption("Scrape endpoint unreachable right now — the API may be waking "
+                   "from sleep on the free tier.")
+
+    st.caption(
+        "Prometheus stores the history of these series and Grafana charts them with "
+        "alerting; both run as an operations stack next to the pipeline rather than "
+        "as a public page, which is how monitoring is normally deployed. The scrape "
+        "endpoint above is public, so any Prometheus — including Grafana Cloud — can "
+        "read it. Set GRAFANA_URL or PROMETHEUS_URL to link a hosted instance here.")
     with st.expander("PromQL queries used by the Grafana dashboard"):
         for q, desc in {
             "apollo_avg_chi": "Average Community Health Index (0-100)",

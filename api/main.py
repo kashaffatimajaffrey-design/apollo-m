@@ -16,6 +16,7 @@ Endpoints:
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 import pandas as pd
 import psycopg2
 from datetime import datetime
@@ -116,6 +117,79 @@ def root():
 
 
 # ── Health check ───────────────────────────────────────────────
+@app.get("/metrics", response_class=PlainTextResponse,
+         summary="Prometheus metrics (OpenMetrics text exposition format)")
+def metrics():
+    """
+    Publish APOLLO-M's metrics in Prometheus exposition format.
+
+    monitoring/exporter.py serves the same series on localhost:9100, which only
+    a machine running the pipeline can reach — so on the deployed system there
+    was no scrapeable endpoint at all, and the monitoring layer existed only on
+    a developer's laptop. Serving them from the API makes them reachable by any
+    Prometheus (including Grafana Cloud) and readable in a browser.
+
+    Hand-formatted rather than pulling in prometheus_client: the exposition
+    format is a few lines of text and the deployed image stays smaller.
+    """
+    rows = query_db("SELECT community_health_index AS chi, toxicity_rate AS tox "
+                    "FROM community_health")
+    n = len(rows)
+    chi = [float(r["chi"]) for r in rows if r["chi"] is not None]
+    tox = [float(r["tox"]) for r in rows if r["tox"] is not None]
+
+    def band(v: float) -> str:
+        return "LOW" if v >= 85 else "MEDIUM" if v >= 75 else "HIGH" if v >= 65 else "CRITICAL"
+
+    critical = sum(1 for v in chi if band(v) == "CRITICAL")
+    p50 = None
+    try:
+        fr = query_db("SELECT predicted_toxicity FROM forecasts "
+                      "ORDER BY forecast_date ASC LIMIT 1")
+        p50 = float(fr[0]["predicted_toxicity"]) if fr else None
+    except Exception:  # noqa: BLE001
+        pass
+
+    m: list[str] = []
+
+    def add(name, helptext, value, mtype="gauge"):
+        if value is None:
+            return
+        m.append(f"# HELP {name} {helptext}")
+        m.append(f"# TYPE {name} {mtype}")
+        m.append(f"{name} {value}")
+
+    add("apollo_communities_total", "Communities analysed", n)
+    add("apollo_critical_alerts", "Communities at CRITICAL alert level", critical)
+    add("apollo_avg_chi", "Mean Community Health Index (0-100)",
+        round(sum(chi) / len(chi), 4) if chi else None)
+    add("apollo_avg_toxicity", "Mean toxicity rate across communities",
+        round(sum(tox) / len(tox), 4) if tox else None)
+    add("apollo_forecast_p50_day1", "Day-1 median toxicity forecast", p50)
+
+    try:
+        mj = json.loads((OUTPUTS / "metrics.json").read_text(encoding="utf-8"))
+        t = mj.get("Toxicity (TF-IDF+LR, Jigsaw)", {})
+        add("apollo_toxicity_f1_micro", "Toxicity classifier micro F1",
+            float(str(t.get("F1 micro", "")).strip() or 0) or None)
+        add("apollo_toxicity_f1_macro", "Toxicity classifier macro F1",
+            float(str(t.get("F1 macro", "")).strip() or 0) or None)
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        vj = json.loads((OUTPUTS / "validation.json").read_text(encoding="utf-8"))
+        add("apollo_forecast_slope_roc_auc",
+            "TFT slope ROC-AUC against planted ground truth",
+            vj["forecast_tft"]["slope_roc_auc"])
+        add("apollo_instability_roc_auc",
+            "Instability-score ROC-AUC against planted ground truth",
+            vj["detection"]["instability_score_roc_auc"])
+    except Exception:  # noqa: BLE001
+        pass
+
+    return "\n".join(m) + "\n"
+
+
 @app.get("/health")
 def health():
     try:
