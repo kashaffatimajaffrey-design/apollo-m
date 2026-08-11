@@ -85,11 +85,36 @@ section[data-testid="stSidebar"]{background:#0b0b1e;border-right:1px solid rgba(
 """, unsafe_allow_html=True)
 
 
-def _read(name: str) -> pd.DataFrame:
+# Two datasets are kept deliberately rather than one replacing the other.
+#
+#   Benchmark  — 60 communities over 120 days with recorded ground truth. It is
+#                the only source where the answer is known in advance, so it is
+#                the only place recall can be measured, and it shows the system
+#                at a scale real collection has not yet reached.
+#   Real Reddit— genuine comments collected through Arctic Shift. Fewer
+#                communities, but every number is computed from real activity.
+#
+# Both are produced by the same pipeline; only the ingestion adapter differs.
+DATASETS = {
+    "Benchmark (simulation)": OUTPUTS,
+    "Real Reddit": OUTPUTS / "real",
+}
+
+
+def _read_from(base: Path, name: str) -> pd.DataFrame:
     try:
-        return pd.read_csv(OUTPUTS / name)
+        return pd.read_csv(base / name)
     except Exception:
         return pd.DataFrame()
+
+
+def _read(name: str) -> pd.DataFrame:
+    """Read from the dataset the sidebar has selected, falling back to benchmark."""
+    base = st.session_state.get("dataset_dir", OUTPUTS)
+    df = _read_from(base, name)
+    if df.empty and base != OUTPUTS:
+        return _read_from(OUTPUTS, name)
+    return df
 
 
 def alert_of(chi: float) -> str:
@@ -170,6 +195,18 @@ if not st.session_state.user:
                    "viewer / apollo_viewer")
     st.stop()
 
+# ── Dataset selection ───────────────────────────────────────────────────────
+# Chosen before the data is read, since every page below depends on it.
+_avail = {k: v for k, v in DATASETS.items()
+          if (v / "meso_report.csv").exists() or k.startswith("Benchmark")}
+with st.sidebar:
+    _choice = st.radio("Dataset", list(_avail.keys()), index=0,
+                       help="Benchmark = declared simulation with recorded ground "
+                            "truth. Real Reddit = comments collected live through "
+                            "Arctic Shift. Same pipeline, different ingestion.")
+st.session_state["dataset_dir"] = _avail[_choice]
+IS_REAL = _choice == "Real Reddit"
+
 # ── Data ────────────────────────────────────────────────────────────────────
 meso = _read("meso_report.csv")
 clusters = _read("clusters_report.csv")
@@ -214,6 +251,25 @@ with st.sidebar:
         except Exception:
             pass
         st.rerun()
+
+
+def dataset_banner():
+    """
+    Say which corpus the numbers on screen come from.
+
+    Without this the two datasets are indistinguishable once a chart is on
+    screen, and a reader could take benchmark figures for measurements of real
+    communities — the precise confusion the split exists to avoid.
+    """
+    if IS_REAL:
+        st.success("**Real Reddit** — every figure below is computed from genuine "
+                   "comments collected through Arctic Shift, scored by "
+                   "`unitary/toxic-bert`.")
+    else:
+        st.info("**Benchmark (declared simulation)** — 60 communities over 120 days "
+                "with recorded ground truth. Used to measure recall, because it is "
+                "the only source where the answer is known in advance. Switch the "
+                "dataset in the sidebar for real Reddit.")
 
 
 def kpi_row():
@@ -319,6 +375,7 @@ st.markdown('<div class="apollo-title">🪐 APOLLO-M</div>', unsafe_allow_html=T
 
 if page == "Overview":
     st.subheader("Overview")
+    dataset_banner()
     kpi_row()
     st.write("")
     if meso.empty:
@@ -332,6 +389,7 @@ if page == "Overview":
 
 elif page == "🎯 Actions":
     st.subheader("Proactive moderation actions")
+    dataset_banner()
     st.caption("This is the point of the system: a **standardised recommended action per "
                "community** so every moderator responds consistently — and the forecast lets "
                "them act **before** a community destabilises, not after.")
@@ -366,6 +424,7 @@ elif page == "🎯 Actions":
 
 elif page == "Communities":
     st.subheader("Community drill-down")
+    dataset_banner()
     if meso.empty:
         st.info("No community data yet.")
     else:
@@ -396,6 +455,7 @@ elif page == "Communities":
 
 elif page == "Forecast":
     st.subheader("5-day toxicity forecast (TFT)")
+    dataset_banner()
     if forecast.empty or not {"p10", "p50", "p90", "subreddit"}.issubset(forecast.columns):
         st.info("No forecast — run `python gen_forecasts.py`.")
     else:
@@ -423,6 +483,7 @@ elif page == "Forecast":
 
 elif page == "Clusters":
     st.subheader("Community clusters (unsupervised)")
+    dataset_banner()
     if clusters.empty or not {"pca_x", "pca_y"}.issubset(clusters.columns):
         st.info("No clusters — run `python main.py --mode unsupervised`.")
     else:

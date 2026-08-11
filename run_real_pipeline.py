@@ -40,7 +40,7 @@ from main import Config, DataLoader_APOLLO, MesoLayer, UnsupervisedLayer  # noqa
 
 ROOT = Path(__file__).resolve().parent
 SCORED = ROOT / "data" / "reddit_live_scored.csv"
-OUT = ROOT / "outputs"
+OUT = ROOT / "outputs" / "real"
 log = logging.getLogger("real-pipeline")
 
 
@@ -49,6 +49,7 @@ def main() -> None:
         raise SystemExit(
             "data/reddit_live_scored.csv not found — run score_real_reddit.py first")
 
+    OUT.mkdir(parents=True, exist_ok=True)
     cfg = Config()
     df = pd.read_csv(SCORED)
     # The meso layer expects the pipeline's column names and an r/ prefix.
@@ -121,7 +122,7 @@ def main() -> None:
     daily = daily.sort_values(["subreddit", "date"]).reset_index(drop=True)
     daily["time_idx"] = daily.groupby("subreddit").cumcount()
     daily["group_id"] = daily["subreddit"]
-    daily.to_csv(ROOT / "data" / "apollo_daily.csv", index=False)
+    daily.to_csv(ROOT / "data" / "apollo_daily_real.csv", index=False)
     print(f"\ndaily series -> data/apollo_daily.csv "
           f"({len(daily)} rows, {daily.subreddit.nunique()} communities)")
 
