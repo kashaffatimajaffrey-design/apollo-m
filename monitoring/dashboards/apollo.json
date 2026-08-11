@@ -54,6 +54,15 @@
             ]
           }
         }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
     },
     {
@@ -83,6 +92,15 @@
             "fixedColor": "red"
           }
         }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
     },
     {
@@ -110,6 +128,15 @@
           "min": 0,
           "max": 1
         }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
       }
     },
     {
@@ -136,6 +163,15 @@
         "defaults": {
           "min": 0,
           "max": 1
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         }
       }
     },
@@ -191,7 +227,16 @@
           "expr": "apollo_communities_total",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
     }
   ]
 }
