@@ -191,7 +191,7 @@ with st.sidebar:
                 unsafe_allow_html=True)
     st.caption(f"Signed in: **{st.session_state.user}**")
     page = st.radio("Navigate", ["Overview", "🎯 Actions", "Communities", "Forecast",
-                                 "Clusters", "🔴 Live", "Monitoring"])
+                                 "Clusters", "🔴 Live", "🌐 Real Reddit", "Monitoring"])
     provider = st.radio("LLM provider", ["claude", "ollama"], horizontal=True,
                         help="Claude = cloud API (works now). Ollama = local & free, "
                              "but needs `ollama serve` + a pulled model running.")
@@ -439,6 +439,136 @@ elif page == "Clusters":
 elif page == "🔴 Live":
     st.subheader("Real-time comment processing")
     live_panel()
+
+elif page == "🌐 Real Reddit":
+    st.subheader("Real Reddit ingestion")
+
+    # A live call, made when the button is pressed. Everything else on this page
+    # is a stored corpus; this proves the ingestion path is genuinely open right
+    # now rather than something that worked once on a developer's machine. It
+    # needs no credentials, which is the whole reason Arctic Shift was chosen
+    # over Reddit's own API.
+    st.markdown("**Fetch live from Reddit — right now**")
+    fc = st.columns([2, 1, 1])
+    sub_live = fc[0].text_input("Subreddit", value="politics",
+                                label_visibility="collapsed",
+                                placeholder="subreddit, e.g. politics")
+    n_live = fc[1].selectbox("How many", [10, 25, 50], index=0,
+                             label_visibility="collapsed")
+    go_live = fc[2].button("⚡ Fetch now", use_container_width=True, type="primary")
+
+    if go_live:
+        import datetime as _dt
+        import requests as _rq
+        with st.spinner(f"calling Arctic Shift for r/{sub_live}…"):
+            try:
+                now = int(_dt.datetime.now(_dt.timezone.utc).timestamp())
+                r = _rq.get("https://arctic-shift.photon-reddit.com/api/comments/search",
+                            params={"subreddit": sub_live.strip().lstrip("r/"),
+                                    "before": now, "limit": int(n_live)}, timeout=25)
+                if r.status_code != 200:
+                    st.error(f"Arctic Shift returned HTTP {r.status_code}")
+                else:
+                    rows = [c for c in (r.json().get("data") or [])
+                            if (c.get("body") or "").strip()
+                            not in ("", "[deleted]", "[removed]")]
+                    if not rows:
+                        st.warning("No comments returned for that subreddit/window.")
+                    else:
+                        newest = max(c["created_utc"] for c in rows)
+                        age = (now - newest) / 60
+                        st.success(f"Fetched {len(rows)} comments from r/{sub_live} — "
+                                   f"newest posted {age:.0f} minutes ago.")
+                        st.caption("Live HTTP call, no credentials, made when you "
+                                   "pressed the button. Toxicity scoring runs in the "
+                                   "pipeline, which loads the transformer locally.")
+                        for c in rows[:12]:
+                            ts = _dt.datetime.fromtimestamp(
+                                c["created_utc"], _dt.timezone.utc).strftime("%H:%M UTC")
+                            st.markdown(
+                                f"<span style='color:#22d3ee'>●</span> "
+                                f"<b>r/{c.get('subreddit', sub_live)}</b> "
+                                f"<span style='color:#7c83b3'>u/{c.get('author','?')} "
+                                f"· {ts}</span> — {str(c.get('body',''))[:170]}",
+                                unsafe_allow_html=True)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"Live fetch failed: {exc}")
+    st.divider()
+    # Reads from outputs/ rather than data/, because data/*.csv is gitignored and
+    # would therefore be absent on the hosted dashboard — the page would look
+    # broken everywhere except the machine that collected the corpus.
+    summary_p = OUTPUTS / "real_reddit_summary.json"
+    daily_p = OUTPUTS / "real_reddit_daily.csv"
+    recent_p = OUTPUTS / "real_reddit_recent.csv"
+
+    if not summary_p.exists():
+        st.info("**No real-Reddit corpus yet.** Collect one with\n\n"
+                "`python ingest/arctic_shift.py --days 40 --per-sub 2400`\n\n"
+                "then score it with `python score_real_reddit.py`.")
+    else:
+        s = json.loads(summary_p.read_text(encoding="utf-8"))
+        st.caption(f"Source: **{s.get('source','Arctic Shift')}** · scored by "
+                   f"`{s.get('model','unitary/toxic-bert')}` — the same micro layer "
+                   "the rest of the pipeline uses.")
+
+        k = st.columns(5)
+        k[0].metric("Comments", f"{s.get('comments_scored', 0):,}")
+        k[1].metric("Communities", s.get("subreddits", 0))
+        k[2].metric("Authors", f"{s.get('authors', 0):,}")
+        k[3].metric("Days covered", s.get("days_covered", 0))
+        k[4].metric("Mean toxicity", f"{s.get('mean_toxicity_overall', 0):.3f}")
+        rng = s.get("date_range") or []
+        if len(rng) == 2:
+            st.caption(f"Window: {rng[0]} → {rng[1]}  ·  overall toxic rate "
+                       f"{s.get('toxic_rate_overall', 0):.1%}")
+
+        per = s.get("per_community") or {}
+        if per:
+            st.markdown("**Toxicity by community — measured on real comments**")
+            pc = (pd.DataFrame(per).T.reset_index()
+                    .rename(columns={"index": "subreddit"})
+                    .sort_values("mean_toxicity", ascending=False))
+            fig = go.Figure(go.Bar(
+                x=pc["subreddit"].apply(lambda v: f"r/{v}"),
+                y=pc["mean_toxicity"],
+                marker=dict(color=pc["mean_toxicity"], colorscale="Plasma"),
+                hovertemplate="%{x}<br>mean toxicity %{y:.3f}<extra></extra>"))
+            fig.update_layout(height=330, margin=dict(l=10, r=10, t=10, b=10),
+                              paper_bgcolor="rgba(0,0,0,0)",
+                              plot_bgcolor="rgba(0,0,0,0)",
+                              font_color="#e5e7ff", yaxis_title="mean toxicity")
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(pc, use_container_width=True, hide_index=True)
+
+        if daily_p.exists():
+            st.markdown("**Daily toxicity — the series the forecaster consumes**")
+            dd = pd.read_csv(daily_p, parse_dates=["date"])
+            picks = st.multiselect("Communities", sorted(dd["subreddit"].unique()),
+                                   default=sorted(dd["subreddit"].unique())[:4])
+            f2 = go.Figure()
+            for sub in picks:
+                g = dd[dd["subreddit"] == sub].sort_values("date")
+                f2.add_trace(go.Scatter(x=g["date"], y=g["avg_toxicity"],
+                                        mode="lines+markers", name=f"r/{sub}"))
+            f2.update_layout(height=360, margin=dict(l=10, r=10, t=10, b=10),
+                             paper_bgcolor="rgba(0,0,0,0)",
+                             plot_bgcolor="rgba(0,0,0,0)", font_color="#e5e7ff",
+                             yaxis_title="daily mean toxicity")
+            st.plotly_chart(f2, use_container_width=True)
+
+        if recent_p.exists():
+            st.markdown("**Recent real comments** (scored)")
+            rc = pd.read_csv(recent_p)
+            for _, r in rc.head(12).iterrows():
+                tox = float(r.get("toxicity_score", 0))
+                col = "#ef4444" if tox >= 0.5 else "#f59e0b" if tox >= 0.2 else "#22c55e"
+                st.markdown(
+                    f"<span style='color:{col}'>●</span> <b>r/{r['subreddit']}</b> "
+                    f"<span style='color:#7c83b3'>u/{r.get('author','?')}</span> "
+                    f"tox={tox:.2f} — {str(r['body'])[:150]}",
+                    unsafe_allow_html=True)
+
+        st.info(s.get("note", ""))
 
 elif page == "Monitoring":
     st.subheader("Monitoring")
