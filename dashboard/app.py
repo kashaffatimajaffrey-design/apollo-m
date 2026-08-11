@@ -131,6 +131,18 @@ with st.sidebar:
     st.markdown('<div class="apollo-title" style="font-size:1.6rem">🪐 APOLLO-M</div>',
                 unsafe_allow_html=True)
     st.caption(f"Signed in: **{st.session_state.user}**")
+    # There was previously no way out of the session: once signed in, the only
+    # way to change account was to clear browser storage. Ends the Google (OIDC)
+    # session too where one exists, so "sign out" does not leave the user
+    # silently re-authenticated on the next rerun.
+    if st.button("Sign out", use_container_width=True):
+        st.session_state.user = None
+        try:
+            if GOOGLE and getattr(st, "user", None) is not None and st.user.is_logged_in:
+                st.logout()
+        except Exception:
+            pass
+        st.rerun()
     page = st.radio("Navigate", ["Overview", "🎯 Actions", "Communities", "Forecast",
                                  "Clusters", "🔴 Live", "Monitoring"])
     provider = st.radio("LLM provider", ["claude", "ollama"], horizontal=True,
