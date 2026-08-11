@@ -22,6 +22,33 @@ sys.path.insert(0, str(ROOT))
 
 st.set_page_config(page_title="APOLLO-M", page_icon="🪐", layout="wide")
 
+
+def _secrets_to_env() -> None:
+    """
+    Publish Streamlit secrets as environment variables.
+
+    The LLM layer reads os.getenv("ANTHROPIC_API_KEY"), which works locally
+    because llm/__init__.py loads the git-ignored .env. A Streamlit Cloud
+    deployment has no .env, so the key was never visible and every explanation
+    silently degraded to "[template fallback — no LLM reachable]" — the layer
+    working exactly as designed, on a key that was never delivered to it.
+
+    setdefault, not assignment: a real environment variable always wins, so this
+    cannot override a deliberate local setting.
+    """
+    import os as _os
+    try:
+        for key in ("ANTHROPIC_API_KEY", "CLAUDE_MODEL", "LLM_PROVIDER",
+                    "OLLAMA_HOST", "OLLAMA_MODEL", "APOLLO_API_URL"):
+            if key in st.secrets:
+                _os.environ.setdefault(key, str(st.secrets[key]))
+    except Exception:
+        # No secrets file at all is a normal local state, not an error.
+        pass
+
+
+_secrets_to_env()
+
 st.markdown("""
 <style>
 .stApp { background:
@@ -188,7 +215,13 @@ def kpi_row():
 def live_panel():
     sp = OUTPUTS / "live_stats.json"
     if not sp.exists():
-        st.info("Live replay idle — run `python ingest/live_replay.py`.")
+        # Says "local-only" rather than just "idle": on the hosted dashboard the
+        # replay is not running and never will be, so a bare "idle" reads as a
+        # fault instead of the documented design.
+        st.info("**Live replay runs locally.** This page streams the real corpus "
+                "through the pipeline in real time on the machine running "
+                "`python ingest/live_replay.py`. The hosted dashboard serves "
+                "precomputed results, so there is no live feed here.")
         return
     s = json.loads(sp.read_text())
     c = st.columns(4)
@@ -361,4 +394,7 @@ elif page == "Monitoring":
         st.code("\n".join([l for l in m.splitlines() if l.startswith("apollo_")]) or "no apollo metrics",
                 language="text")
     except Exception:
-        st.info("Exporter not reachable — run `python monitoring/exporter.py`.")
+        st.info("**Monitoring runs locally.** Prometheus scrapes the exporter on "
+                "`localhost:9100` and Grafana renders it on `localhost:3000`; "
+                "neither is reachable from a hosted page. Start them with "
+                "`python monitoring/exporter.py` to see this section populate.")
