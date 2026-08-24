@@ -1,0 +1,260 @@
+{
+  "configuration": "lexical stance + hashing embedder (no transformers) \u2014 the configuration the deployed free tier runs, and the one the headline figure was measured under",
+  "corpus_documents": 17,
+  "claims_tested": 10,
+  "refuted": 9,
+  "not_refuted": 1,
+  "note": "The claims not refuted return insufficient evidence rather than support: the system declines to rule, and never asserts that a false claim is true. That is the safe direction of failure.",
+  "results": [
+    {
+      "claim": "5G towers spread the coronavirus.",
+      "verdict": "refuted",
+      "confidence": 0.6823,
+      "refuted": true,
+      "citations": [
+        "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters",
+        "https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health",
+        "https://www.fda.gov/consumers/consumer-updates/why-you-should-not-use-ivermectin-treat-or-prevent-covid-19"
+      ],
+      "top_evidence": [
+        {
+          "title": "WHO: 5G mobile networks do not spread COVID-19 (summary)",
+          "domain": "who.int",
+          "stance": "contradict",
+          "credibility": 0.97
+        },
+        {
+          "title": "WHO: 5G radiation and health \u2014 no adverse effects established (summary)",
+          "domain": "who.int",
+          "stance": "contradict",
+          "credibility": 0.97
+        }
+      ]
+    },
+    {
+      "claim": "Scientists confirmed that 5G mobile networks cause COVID-19 and the WHO is hiding it.",
+      "verdict": "refuted",
+      "confidence": 0.7716,
+      "refuted": true,
+      "citations": [
+        "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters",
+        "https://www.fda.gov/consumers/consumer-updates/why-you-should-not-use-ivermectin-treat-or-prevent-covid-19",
+        "https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health"
+      ],
+      "top_evidence": [
+        {
+          "title": "WHO: 5G mobile networks do not spread COVID-19 (summary)",
+          "domain": "who.int",
+          "stance": "contradict",
+          "credibility": 0.97
+        },
+        {
+          "title": "FDA: Ivermectin is not authorised to treat or prevent COVID-19 (summary)",
+          "domain": "fda.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        }
+      ]
+    },
+    {
+      "claim": "Vaccines cause autism in children.",
+      "verdict": "refuted",
+      "confidence": 0.8756,
+      "refuted": true,
+      "citations": [
+        "https://www.cdc.gov/vaccinesafety/concerns/autism.html",
+        "https://www.nhs.uk/conditions/vaccinations/why-vaccination-is-safe-and-important/",
+        "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/different-vaccines/mrna.html"
+      ],
+      "top_evidence": [
+        {
+          "title": "CDC: Vaccines do not cause autism (summary)",
+          "domain": "cdc.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "NHS: There is no link between vaccines and autism (summary)",
+          "domain": "nhs.uk",
+          "stance": "contradict",
+          "credibility": 0.94
+        }
+      ]
+    },
+    {
+      "claim": "COVID-19 vaccines contain microchips used to track people.",
+      "verdict": "refuted",
+      "confidence": 0.6526,
+      "refuted": true,
+      "citations": [
+        "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/different-vaccines/mrna.html",
+        "https://www.fda.gov/consumers/consumer-updates/why-you-should-not-use-ivermectin-treat-or-prevent-covid-19",
+        "https://www.reuters.com/article/factcheck-coronavirus-gates-idUSL1N2SO1WV"
+      ],
+      "top_evidence": [
+        {
+          "title": "CDC: mRNA vaccines do not change your DNA (summary)",
+          "domain": "cdc.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "FDA: Ivermectin is not authorised to treat or prevent COVID-19 (summary)",
+          "domain": "fda.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        }
+      ]
+    },
+    {
+      "claim": "Drinking bleach cures COVID-19.",
+      "verdict": "refuted",
+      "confidence": 0.6546,
+      "refuted": true,
+      "citations": [
+        "https://www.fda.gov/consumers/consumer-updates/danger-dont-drink-miracle-mineral-solution-or-similar-products",
+        "https://www.fda.gov/consumers/consumer-updates/why-you-should-not-use-ivermectin-treat-or-prevent-covid-19",
+        "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters"
+      ],
+      "top_evidence": [
+        {
+          "title": "FDA: Drinking bleach or Miracle Mineral Solution does not cure disease (summary)",
+          "domain": "fda.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "FDA: Ivermectin is not authorised to treat or prevent COVID-19 (summary)",
+          "domain": "fda.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        }
+      ]
+    },
+    {
+      "claim": "Ivermectin is a proven cure for COVID-19 that authorities are suppressing.",
+      "verdict": "refuted",
+      "confidence": 0.6275,
+      "refuted": true,
+      "citations": [
+        "https://www.fda.gov/consumers/consumer-updates/why-you-should-not-use-ivermectin-treat-or-prevent-covid-19",
+        "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters",
+        "https://www.who.int/news/item/27-04-2020-who-timeline---covid-19"
+      ],
+      "top_evidence": [
+        {
+          "title": "FDA: Ivermectin is not authorised to treat or prevent COVID-19 (summary)",
+          "domain": "fda.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "WHO: 5G mobile networks do not spread COVID-19 (summary)",
+          "domain": "who.int",
+          "stance": "contradict",
+          "credibility": 0.97
+        }
+      ]
+    },
+    {
+      "claim": "The Apollo Moon landings were faked in a Hollywood studio.",
+      "verdict": "refuted",
+      "confidence": 0.671,
+      "refuted": true,
+      "citations": [
+        "https://www.nasa.gov/mission/apollo-11/",
+        "https://science.nasa.gov/moon/",
+        "https://www.snopes.com/fact-check/is-the-earth-flat/"
+      ],
+      "top_evidence": [
+        {
+          "title": "NASA: The Apollo Moon landings were not faked (summary)",
+          "domain": "nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.97
+        },
+        {
+          "title": "NASA: Independent evidence that Apollo astronauts landed on the Moon (summary)",
+          "domain": "science.nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.97
+        }
+      ]
+    },
+    {
+      "claim": "Global warming is a hoax invented by scientists.",
+      "verdict": "refuted",
+      "confidence": 0.721,
+      "refuted": true,
+      "citations": [
+        "https://climate.nasa.gov/vital-signs/global-temperature/",
+        "https://science.nasa.gov/climate-change/scientific-consensus/",
+        "https://www.ipcc.ch/report/ar6/wg1/"
+      ],
+      "top_evidence": [
+        {
+          "title": "NASA: The global temperature record (summary)",
+          "domain": "climate.nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "NASA: Scientific consensus on human-caused climate change (summary)",
+          "domain": "science.nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.97
+        }
+      ]
+    },
+    {
+      "claim": "The Earth is flat.",
+      "verdict": "insufficient_evidence",
+      "confidence": 0.5136,
+      "refuted": false,
+      "citations": [
+        "https://science.nasa.gov/earth/",
+        "https://www.nasa.gov/mission/apollo-11/",
+        "https://climate.nasa.gov/vital-signs/global-temperature/"
+      ],
+      "top_evidence": [
+        {
+          "title": "NASA: The shape of the Earth is not flat (summary)",
+          "domain": "science.nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.97
+        },
+        {
+          "title": "NASA: The Apollo Moon landings were not faked (summary)",
+          "domain": "nasa.gov",
+          "stance": "contradict",
+          "credibility": 0.97
+        }
+      ]
+    },
+    {
+      "claim": "mRNA vaccines alter your DNA.",
+      "verdict": "refuted",
+      "confidence": 0.6461,
+      "refuted": true,
+      "citations": [
+        "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/different-vaccines/mrna.html",
+        "https://www.cdc.gov/vaccinesafety/concerns/autism.html",
+        "https://www.reuters.com/article/factcheck-coronavirus-gates-idUSL1N2SO1WV"
+      ],
+      "top_evidence": [
+        {
+          "title": "CDC: mRNA vaccines do not change your DNA (summary)",
+          "domain": "cdc.gov",
+          "stance": "contradict",
+          "credibility": 0.96
+        },
+        {
+          "title": "CDC: Vaccines do not cause autism (summary)",
+          "domain": "cdc.gov",
+          "stance": "neutral",
+          "credibility": 0.96
+        }
+      ]
+    }
+  ]
+}

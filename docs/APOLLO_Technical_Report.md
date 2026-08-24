@@ -168,10 +168,7 @@ earlier draft quoted "99.77%", another hardcoded literal, now withdrawn.
 `outputs/metrics.json` records the module as `not_evaluated`, and the dashboard
 caption states the mapping is deterministic.
 
-*(The originally-scoped Reinforcement Learning system was deliberately replaced by
-a supervised design — RL needs a labelled simulation environment we do not have.
-That substitution stands as a decision; the replacement is specified above but is
-not yet wired into the pipeline.)*
+
 
 **5.7 Explanation (LLM).** The `llm/` layer turns numbers into plain-English analyst narration, provider-switchable between **Ollama** (local, free, default) and **Claude** (higher-quality, for demonstration), with a deterministic template fallback so the pipeline never depends on an LLM being reachable.
 

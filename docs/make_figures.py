@@ -121,7 +121,7 @@ def _png(svg_path: Path) -> None:
 
 def fig_apollo_architecture() -> None:
     s = SVG(1180, 1080, "APOLLO-M — System Architecture",
-            "Layered pipeline. Eight of eleven modules are integrated and run on every execution.")
+            "Layered pipeline. Ten of eleven modules are integrated and run on every execution.")
 
     # Legend. Both statuses get their own pill drawn exactly as the chips draw
     # them, so the key cannot drift from what the diagram actually shows.
@@ -158,7 +158,7 @@ def fig_apollo_architecture() -> None:
     s.chip(x + 120, y + 14, 300, 64, "Toxicity|unitary/toxic-bert", "INTEGRATED", BLUE)
     s.chip(x + 434, y + 14, 300, 64, "Text embeddings|BERT / RoBERTa → PCA", "INTEGRATED", BLUE)
     s.chip(x + 748, y + 14, 328, 64, "Misinformation|TF-IDF + Logistic Regression",
-           "PHASE 2", BLUE)
+           "INTEGRATED", BLUE)
     y += 104
     s.arrow(x + 598, y, x + 598, y + 18)
     y += 24
@@ -169,7 +169,7 @@ def fig_apollo_architecture() -> None:
                                      "echo-chamber, churn", "INTEGRATED", GREEN)
     s.chip(x + 434, y + 14, 300, 64, "Instability score|recent vs baseline toxicity|"
                                      "(trend-aware)", "INTEGRATED", GREEN)
-    s.chip(x + 748, y + 14, 328, 64, "GraphSAGE GNN|community structure", "PHASE 2", GREEN)
+    s.chip(x + 748, y + 14, 328, 64, "GraphSAGE GNN|structural risk per community", "INTEGRATED", GREEN)
     s.chip(x + 120, y + 86, 614, 58, "Unsupervised — K-Means + DBSCAN over community "
                                      "features|5 clusters, outlier flags", "INTEGRATED", GREEN)
     s.chip(x + 748, y + 86, 328, 58, "Transformer autoencoder|awaiting real training sequences",

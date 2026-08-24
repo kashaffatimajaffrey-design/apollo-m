@@ -1,0 +1,43 @@
+{
+  "recommender_policy_fidelity": {
+    "status": "measured",
+    "per_dataset": [
+      {
+        "dataset": "benchmark",
+        "n": 60,
+        "exact_agreement": 1.0,
+        "within_one_band": 1.0,
+        "distribution": {
+          "EMERGENCY_INTERVENTION": 38,
+          "INCREASE_MODERATION": 20,
+          "WARN": 2
+        }
+      },
+      {
+        "dataset": "real",
+        "n": 24,
+        "exact_agreement": 1.0,
+        "within_one_band": 1.0,
+        "distribution": {
+          "WARN": 22,
+          "EMERGENCY_INTERVENTION": 1,
+          "INCREASE_MODERATION": 1
+        }
+      }
+    ],
+    "held_out_sample": {
+      "n": 4000,
+      "exact_agreement": 0.9982,
+      "within_one_band": 1.0
+    },
+    "interpretation": "Fidelity to the documented threshold policy, not accuracy against observed moderator decisions \u2014 no labelled corpus of real moderation actions exists. The figure states how faithfully the model reproduces the policy it was fitted to, which is the only claim its training data supports."
+  },
+  "graphsage_structural_risk": {
+    "status": "measured",
+    "communities_scored": 18,
+    "communities_total": 60,
+    "planted_in_scored": 5,
+    "roc_auc": 0.4154,
+    "interpretation": "Measured on the same task and against the same withheld ground truth as CHI, raw toxicity and the instability score, so it can be read directly against Table 3.2. The model was trained with 'at risk' defined as CHI below 75 while most graph nodes carry no CHI, so it was fitted on a heavily imbalanced target and is not expected to separate a trend-based signal; the figure records what it actually achieves rather than leaving it unscored."
+  }
+}

@@ -2,7 +2,7 @@
 <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6178"/></marker></defs>
 <rect width="1180" height="1080" fill="#ffffff"/>
 <text x="36" y="52" font-size="27" fill="#12142b" font-weight="bold" text-anchor="start">APOLLO-M — System Architecture</text>
-<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">Layered pipeline. Eight of eleven modules are integrated and run on every execution.</text>
+<text x="36" y="78" font-size="14" fill="#5b6178" font-weight="normal" text-anchor="start">Layered pipeline. Ten of eleven modules are integrated and run on every execution.</text>
 <rect x="736" y="26" width="408" height="62" rx="8" fill="#fbfbfd" stroke="#c9cee0" stroke-width="1.4"/>
 <rect x="750" y="38" width="74" height="20" rx="9" fill="#dcf2e8" stroke="#12805c" stroke-width="1"/>
 <text x="787" y="52" font-size="9" fill="#12805c" font-weight="bold" text-anchor="middle">INTEGRATED</text>
@@ -37,11 +37,11 @@
 <text x="620.0" y="340.5" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">BERT / RoBERTa → PCA</text>
 <rect x="692" y="303" width="70" height="17" rx="8" fill="#dcf2e8" stroke="#12805c" stroke-width="1"/>
 <text x="727.0" y="315.5" font-size="9.5" fill="#12805c" font-weight="bold" text-anchor="middle">INTEGRATED</text>
-<rect x="784" y="296" width="328" height="64" rx="7" fill="#ffffff" stroke="#8a6d00" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="784" y="296" width="328" height="64" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.2"/>
 <text x="948.0" y="325.5" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Misinformation</text>
 <text x="948.0" y="340.5" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">TF-IDF + Logistic Regression</text>
-<rect x="1042" y="303" width="62" height="17" rx="8" fill="#fdf6d8" stroke="#8a6d00" stroke-width="1"/>
-<text x="1073.0" y="315.5" font-size="9.5" fill="#8a6d00" font-weight="bold" text-anchor="middle">PHASE 2</text>
+<rect x="1034" y="303" width="70" height="17" rx="8" fill="#dcf2e8" stroke="#12805c" stroke-width="1"/>
+<text x="1069.0" y="315.5" font-size="9.5" fill="#12805c" font-weight="bold" text-anchor="middle">INTEGRATED</text>
 <line x1="634" y1="386" x2="634" y2="404" stroke="#5b6178" stroke-width="1.8" marker-end="url(#a)"/>
 <rect x="36" y="410" width="1108" height="158" rx="8" fill="#e6f5ef" stroke="#12805c" stroke-width="1.4"/>
 <rect x="36" y="410" width="9" height="158" rx="4" fill="#12805c"/>
@@ -58,11 +58,11 @@
 <text x="620.0" y="476.0" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">(trend-aware)</text>
 <rect x="692" y="431" width="70" height="17" rx="8" fill="#dcf2e8" stroke="#12805c" stroke-width="1"/>
 <text x="727.0" y="443.5" font-size="9.5" fill="#12805c" font-weight="bold" text-anchor="middle">INTEGRATED</text>
-<rect x="784" y="424" width="328" height="64" rx="7" fill="#ffffff" stroke="#8a6d00" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="784" y="424" width="328" height="64" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.2"/>
 <text x="948.0" y="453.5" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">GraphSAGE GNN</text>
-<text x="948.0" y="468.5" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">community structure</text>
-<rect x="1042" y="431" width="62" height="17" rx="8" fill="#fdf6d8" stroke="#8a6d00" stroke-width="1"/>
-<text x="1073.0" y="443.5" font-size="9.5" fill="#8a6d00" font-weight="bold" text-anchor="middle">PHASE 2</text>
+<text x="948.0" y="468.5" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">structural risk per community</text>
+<rect x="1034" y="431" width="70" height="17" rx="8" fill="#dcf2e8" stroke="#12805c" stroke-width="1"/>
+<text x="1069.0" y="443.5" font-size="9.5" fill="#12805c" font-weight="bold" text-anchor="middle">INTEGRATED</text>
 <rect x="156" y="496" width="614" height="58" rx="7" fill="#ffffff" stroke="#12805c" stroke-width="1.2"/>
 <text x="463.0" y="522.5" font-size="12.5" fill="#12142b" font-weight="bold" text-anchor="middle">Unsupervised — K-Means + DBSCAN over community features</text>
 <text x="463.0" y="537.5" font-size="12.5" fill="#12142b" font-weight="normal" text-anchor="middle">5 clusters, outlier flags</text>
