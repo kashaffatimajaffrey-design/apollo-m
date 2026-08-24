@@ -156,7 +156,48 @@ def _google_ready() -> bool:
     return True
 
 
+def _auth_origin_mismatch() -> str | None:
+    """
+    Explain why Google sign-in cannot work here, or return None if it should.
+
+    st.login() sends the browser to Google carrying the redirect_uri from the
+    [auth] block in secrets. If that origin is not the origin the app is being
+    served from, the round trip cannot complete: Google rejects an unregistered
+    redirect, or returns the user to a URL that does not exist. Streamlit
+    surfaces either as a bare "Internal server error", which names neither the
+    setting nor the file it lives in.
+
+    The two origins are knowable at runtime, so the mismatch is worth detecting
+    and saying out loud. The usual cause is a secrets file copied from a laptop,
+    where redirect_uri is still http://localhost:8501/oauth2callback — correct
+    locally, wrong everywhere else, and silent until someone clicks the button.
+    """
+    try:
+        configured = str(st.secrets["auth"]["redirect_uri"])
+    except Exception:
+        return "No redirect_uri is set in the [auth] block of secrets."
+    try:
+        here = st.context.url
+    except Exception:
+        return None  # Cannot tell where we are; do not guess at a failure.
+    if not here:
+        return None
+
+    from urllib.parse import urlparse
+    want, got = urlparse(configured), urlparse(here)
+    if (want.scheme, want.netloc) == (got.scheme, got.netloc):
+        return None
+    return (
+        f"Google sign-in is configured to return to **{want.scheme}://{want.netloc}**, "
+        f"but this app is being served from **{got.scheme}://{got.netloc}**. "
+        f"Set `redirect_uri = \"{got.scheme}://{got.netloc}/oauth2callback\"` in the "
+        f"[auth] block of the app's secrets, and add that same URL to the OAuth "
+        f"client's authorised redirect URIs in Google Cloud Console."
+    )
+
+
 GOOGLE = _google_ready()
+GOOGLE_PROBLEM = _auth_origin_mismatch() if GOOGLE else None
 # Adopt a Google (OIDC) identity if the user signed in that way.
 try:
     if GOOGLE and getattr(st, "user", None) is not None and st.user.is_logged_in:
@@ -179,8 +220,20 @@ if not st.session_state.user:
         st.markdown("<p style='text-align:center;color:#a5b4fc;margin-top:-6px'>"
                     "Community-Instability Forecasting Console</p>", unsafe_allow_html=True)
         if GOOGLE:
-            if st.button("Continue with Google", use_container_width=True, type="primary"):
-                st.login("google")
+            if st.button("Continue with Google", use_container_width=True,
+                         type=("secondary" if GOOGLE_PROBLEM else "primary"),
+                         disabled=bool(GOOGLE_PROBLEM)):
+                # Anything st.login() raises reaches the browser as a 500 with no
+                # detail. Catching it keeps the failure inside the page, next to
+                # the password form that still works.
+                try:
+                    st.login("google")
+                except Exception as exc:  # noqa: BLE001 — any failure is the same to a user
+                    st.error(f"Google sign-in failed: {exc}")
+                    st.info("Sign in with **admin / apollo_admin** below — the "
+                            "dashboard does not depend on Google.")
+            if GOOGLE_PROBLEM:
+                st.warning(GOOGLE_PROBLEM)
             st.markdown("<p style='text-align:center;color:#7c83b3'>— or sign in with an account —</p>",
                         unsafe_allow_html=True)
         with st.form("login"):
