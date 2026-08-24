@@ -10,20 +10,35 @@ on:
     paths: ['web/**', '.github/workflows/web.yml']
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: web
-
 # Deliberately runs with no Supabase secrets. Every check here has to pass on a
 # clone with nothing configured, which is also the guarantee that someone can
 # get the app running before they have credentials.
+#
+# Runs #1-#8 all failed at `npm ci`. The cause was not the working directory:
+# package.json had been renamed to apollo-m-web while package-lock.json still
+# carried the old apollo-watch name, and `npm ci` refuses to install when the
+# two disagree -- including on the name field, not just on dependencies. The
+# lockfile is regenerated and `npm ci` verified locally.
+#
+# working-directory is kept per job rather than at workflow level because it is
+# the form hardest to get wrong, and Preflight prints where it is and what it
+# can see, so the next failure of this kind is legible in the log instead of
+# needing the repository to reproduce it.
 jobs:
   gate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '22', cache: npm, cache-dependency-path: web/package-lock.json}
+      - name: Preflight — prove where we are before npm runs
+        run: |
+          echo "pwd: $(pwd)"
+          echo "node: $(node -v)  npm: $(npm -v)"
+          ls -la package.json package-lock.json
       - run: npm ci
       - name: Type safety
         run: npx tsc --noEmit
@@ -36,10 +51,18 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '22', cache: npm, cache-dependency-path: web/package-lock.json}
+      - name: Preflight — prove where we are before npm runs
+        run: |
+          echo "pwd: $(pwd)"
+          echo "node: $(node -v)  npm: $(npm -v)"
+          ls -la package.json package-lock.json
       - run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
