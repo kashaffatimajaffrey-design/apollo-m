@@ -119,3 +119,30 @@ test("the dark palette survives a light-mode system preference", async ({
     `body background was ${bg}, which is not dark`,
   ).toBeLessThan(0.25);
 });
+
+test("a failed sign-in points at sign-up instead of a dead end", async ({
+  page,
+}) => {
+  // Needs a reachable Supabase project, since the message is derived from the
+  // real auth error. CI holds no credentials, so it runs locally only.
+  test.skip(!HAS_BACKEND, "No backend configured; auth cannot be exercised.");
+
+  // Supabase returns one message for an unknown email and a wrong password, so
+  // the form cannot be used to discover which emails are registered. Keeping
+  // that property is right; leaving the raw "Invalid login credentials" was not,
+  // because on a fresh project the real cause is almost always that no account
+  // exists yet, and the message sends people to re-check a correct password.
+  await page.goto("/login");
+  await page
+    .getByLabel("Email")
+    .fill("definitely-not-registered@example.invalid");
+  await page.getByLabel("Password").fill("whateverPassword123");
+  await page.getByRole("button", { name: "Sign in" }).click();
+
+  await expect(page.getByText(/do not match an account/i)).toBeVisible();
+  // Still says nothing about whether that email exists.
+  await expect(
+    page.getByText(/no such user|not registered|unknown email/i),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /create one/i })).toBeVisible();
+});

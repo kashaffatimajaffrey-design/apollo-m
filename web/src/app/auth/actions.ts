@@ -32,10 +32,27 @@ export async function signIn(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Supabase deliberately returns the same message for an unknown email and a
-  // wrong password. Passing it through unchanged keeps it that way, rather than
-  // turning the form into a way to test whether an account exists.
-  if (error) return { error: error.message };
+  // Supabase deliberately returns one message — "Invalid login credentials" —
+  // for both an unknown email and a wrong password, so the form cannot be used
+  // to test whether an account exists. That property is worth keeping, but the
+  // message on its own sends someone to check a password that was never wrong:
+  // on a fresh project the real answer is almost always that they have not
+  // signed up yet.
+  //
+  // So it is rewritten to name both possibilities without distinguishing
+  // between them, which leaks nothing and points at the next action. Other
+  // errors ("Email not confirmed", rate limits) already say what to do and are
+  // passed through untouched.
+  if (error) {
+    if (/invalid login credentials/i.test(error.message)) {
+      return {
+        error:
+          "That email and password do not match an account. If you have not " +
+          "signed up yet, create one below.",
+      };
+    }
+    return { error: error.message };
+  }
 
   revalidatePath("/", "layout");
   redirect(String(formData.get("next") || "/watchlist"));
