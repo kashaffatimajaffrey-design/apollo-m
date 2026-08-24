@@ -1,4 +1,17 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+
 import { test, expect } from "@playwright/test";
+
+/**
+ * Whether this checkout can reach a real Supabase project.
+ *
+ * Deliberately a filesystem check rather than `process.env`: Next.js loads
+ * .env.local inside the dev-server subprocess, so the Playwright runner's own
+ * environment is empty whether or not credentials exist. CI has no .env.local
+ * because it is gitignored, so this is false there.
+ */
+const HAS_BACKEND = existsSync(path.join(process.cwd(), ".env.local"));
 
 test("the dashboard shell renders server-side", async ({ page }) => {
   await page.goto("/");
@@ -13,11 +26,24 @@ test("the dashboard shell renders server-side", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("an unconfigured project explains itself instead of crashing", async ({
+test("a backend that is missing or unmigrated degrades instead of crashing", async ({
   page,
 }) => {
-  // A fresh clone has no .env.local. Both streamed sections should degrade to
-  // setup instructions rather than throwing, and the header must still render.
+  // Only meaningful when there is no reachable, migrated backend — which is
+  // exactly CI, since the runner holds no Supabase secrets. Locally, once
+  // .env.local points at a real project with the schema applied, the app
+  // correctly shows data instead, and asserting the fallback here would fail
+  // for the right reason. Skipping beats loosening the assertion until it
+  // passes in both states and guards neither.
+  test.skip(
+    HAS_BACKEND,
+    "A backend is configured; the degraded path cannot be reached from here.",
+  );
+  // Two ways this fails in practice, and both must render rather than 500:
+  // no credentials at all (a fresh clone, and CI, which holds no secrets), and
+  // credentials that work against a project where the schema has not been
+  // applied yet. Both surface the reason plus the next step, and the header
+  // must survive either.
   await page.goto("/");
   await expect(
     page.getByText(/Supabase is not answering yet/i).first(),
@@ -53,4 +79,18 @@ test("the page renders without JavaScript", async ({ browser }) => {
     page.getByRole("heading", { name: /community instability/i }),
   ).toBeVisible();
   await context.close();
+});
+
+test("no cell renders NaN", async ({ page }) => {
+  // Regression guard. The table once read a `toxicity_trend` column that the
+  // view does not return; because the hand-written row type asserted the field
+  // existed, the compiler stayed happy and every row rendered "NaN". Types
+  // cannot catch a lie about the database's shape, so this asserts on what the
+  // user actually sees.
+  //
+  // Valid in both states: with credentials the table renders real numbers, and
+  // without them (CI holds no secrets) the setup message renders instead.
+  // Neither should ever contain NaN.
+  await page.goto("/");
+  await expect(page.locator("body")).not.toContainText("NaN");
 });

@@ -1,11 +1,24 @@
 export type Alert = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
+/**
+ * One row of `public.community_latest`.
+ *
+ * These fields must match the view's select list exactly. An earlier version
+ * declared a `toxicity_trend` column that the view does not return — and,
+ * because the type asserted it existed, the compiler was happy while every row
+ * rendered `NaN`. A hand-written type that over-promises is worse than no type,
+ * so the safest change here is to keep it in step with
+ * `web/supabase/schema.sql` whenever that view changes.
+ *
+ * Nullable where the pipeline may not have produced a value: a community can be
+ * scored before the graph model or the instability pass has run for it.
+ */
 export type Community = {
   subreddit: string;
   community_health_index: number;
   toxicity_rate: number;
-  toxicity_trend: number;
-  instability_score: number;
+  instability_score: number | null;
+  gnn_risk: number | null;
   total_comments: number;
   recommended_action: string;
   alert: Alert;

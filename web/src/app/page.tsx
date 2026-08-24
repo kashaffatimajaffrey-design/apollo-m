@@ -104,8 +104,12 @@ async function CommunityTable() {
             <th scope="col" className="px-4 py-3 text-right font-medium">
               Toxicity
             </th>
-            <th scope="col" className="px-4 py-3 text-right font-medium">
-              Trend
+            <th
+              scope="col"
+              className="px-4 py-3 text-right font-medium"
+              title="Trend-aware instability: how fast a community is deteriorating, not how bad it is now"
+            >
+              Instability
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
               Alert
@@ -124,8 +128,9 @@ async function CommunityTable() {
                 {(Number(c.toxicity_rate) * 100).toFixed(1)}%
               </td>
               <td className="px-4 py-3 text-right tabular-nums text-white/70">
-                {Number(c.toxicity_trend) > 0 ? "▲" : "▼"}{" "}
-                {Math.abs(Number(c.toxicity_trend)).toFixed(4)}
+                {c.instability_score == null
+                  ? "—"
+                  : Number(c.instability_score).toFixed(4)}
               </td>
               <td className="px-4 py-3">
                 <Pill alert={c.alert} />
