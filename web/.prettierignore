@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+# Playwright writes these on every run. Without this, `format:check` fails
+# locally the moment you run the tests — a formatter complaining about a test
+# artefact trains people to ignore it.
+test-results
+playwright-report
+package-lock.json
+next-env.d.ts
