@@ -14,16 +14,12 @@ on:
 # clone with nothing configured, which is also the guarantee that someone can
 # get the app running before they have credentials.
 #
-# Runs #1-#8 all failed at `npm ci`. The cause was not the working directory:
-# package.json had been renamed to apollo-m-web while package-lock.json still
-# carried the old apollo-watch name, and `npm ci` refuses to install when the
-# two disagree -- including on the name field, not just on dependencies. The
-# lockfile is regenerated and `npm ci` verified locally.
-#
-# working-directory is kept per job rather than at workflow level because it is
-# the form hardest to get wrong, and Preflight prints where it is and what it
-# can see, so the next failure of this kind is legible in the log instead of
-# needing the repository to reproduce it.
+# No `cache: npm` on setup-node. It saves ~/.npm in a post step even when the
+# job failed, and restores through prefix keys, so a cache written during an
+# early broken run outlives the lockfile change that should have invalidated it.
+# A clean install takes about twenty seconds; that is cheaper than a cache that
+# can make runs fail for a reason nothing in the repository explains.
+
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -33,20 +29,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        # No `cache: npm`. setup-node saves ~/.npm in a post step even when the
-        # job failed, and restores through prefix keys, so a cache poisoned by
-        # an early failing run outlives the lockfile change that should have
-        # invalidated it. A clean clone installs in ~20s over the network; that
-        # is cheaper than a cache that can make every future run fail for a
-        # reason nothing in the repository explains.
         with: {node-version: '24'}
-      - name: Preflight — prove where we are before npm runs
+      - name: Preflight
         run: |
           echo "pwd: $(pwd)"
           echo "node: $(node -v)  npm: $(npm -v)"
           ls -la package.json package-lock.json
       - name: Install
-        run: npm ci || (echo "----- npm debug log -----"; cat "$HOME/.npm/_logs/"*.log; exit 1)
+        # Job logs need admin rights on the repository to download, but check-run
+        # annotations are public. Republishing the failure as an annotation is
+        # what lets this be diagnosed by anyone who can see the repository rather
+        # than only by its owner.
+        run: |
+          set +e
+          npm ci > install.out 2>&1
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ]; then
+            echo "----- npm output -----"
+            cat install.out
+            echo "----- npm debug log (tail) -----"
+            tail -n 40 "$HOME"/.npm/_logs/*.log 2>/dev/null || echo "(none written)"
+            msg=$(grep -E "npm (error|ERR)" install.out | head -n 12 | paste -sd ' ' - | cut -c1-800)
+            if [ -z "$msg" ]; then
+              msg=$(tail -n 12 install.out | paste -sd ' ' - | cut -c1-800)
+            fi
+            echo "::error title=npm ci failed::${msg}"
+            exit "$code"
+          fi
       - name: Type safety
         run: npx tsc --noEmit
       - name: Format (Prettier)
@@ -64,20 +74,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        # No `cache: npm`. setup-node saves ~/.npm in a post step even when the
-        # job failed, and restores through prefix keys, so a cache poisoned by
-        # an early failing run outlives the lockfile change that should have
-        # invalidated it. A clean clone installs in ~20s over the network; that
-        # is cheaper than a cache that can make every future run fail for a
-        # reason nothing in the repository explains.
         with: {node-version: '24'}
-      - name: Preflight — prove where we are before npm runs
+      - name: Preflight
         run: |
           echo "pwd: $(pwd)"
           echo "node: $(node -v)  npm: $(npm -v)"
           ls -la package.json package-lock.json
       - name: Install
-        run: npm ci || (echo "----- npm debug log -----"; cat "$HOME/.npm/_logs/"*.log; exit 1)
+        run: |
+          set +e
+          npm ci > install.out 2>&1
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ]; then
+            echo "----- npm output -----"
+            cat install.out
+            echo "----- npm debug log (tail) -----"
+            tail -n 40 "$HOME"/.npm/_logs/*.log 2>/dev/null || echo "(none written)"
+            msg=$(grep -E "npm (error|ERR)" install.out | head -n 12 | paste -sd ' ' - | cut -c1-800)
+            if [ -z "$msg" ]; then
+              msg=$(tail -n 12 install.out | paste -sd ' ' - | cut -c1-800)
+            fi
+            echo "::error title=npm ci failed::${msg}"
+            exit "$code"
+          fi
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: End-to-end smoke tests
