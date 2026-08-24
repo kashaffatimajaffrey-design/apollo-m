@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { removeFromWatchlist } from "../auth/actions";
@@ -14,8 +15,6 @@ import { ALERT_STYLE, type Alert } from "@/lib/types";
  *     else's rows.
  */
 
-export const dynamic = "force-dynamic";
-
 type Joined = {
   id: string;
   subreddit: string;
@@ -24,7 +23,42 @@ type Joined = {
   alert: Alert | null;
 };
 
-export default async function WatchlistPage() {
+/**
+ * Everything on this route depends on who is asking, so all of it is
+ * request-bound — but the heading and frame are not, and there is no reason to
+ * hold those back while Postgres answers.
+ *
+ * Cache Components rejects `dynamic = "force-dynamic"`, and rightly: it was a
+ * blunt instrument that marked the whole route dynamic rather than saying which
+ * part actually was. A Suspense boundary says the same thing precisely, and
+ * gets the shell to the browser first as a side effect.
+ */
+export default function WatchlistPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Your watchlist
+        </h1>
+        <p className="mt-2 text-sm text-white/60">
+          These rows are yours alone — the database refuses to return anyone
+          else&apos;s, whatever this page asks for.
+        </p>
+      </div>
+      <Suspense
+        fallback={
+          <p className="rounded-lg bg-white/5 p-6 text-sm text-white/40 ring-1 ring-white/10">
+            Loading your watchlist…
+          </p>
+        }
+      >
+        <WatchlistBody />
+      </Suspense>
+    </div>
+  );
+}
+
+async function WatchlistBody() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -40,15 +74,7 @@ export default async function WatchlistPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Your watchlist
-        </h1>
-        <p className="mt-2 text-sm text-white/60">
-          Signed in as {user?.email}. These rows are yours alone — the database
-          refuses to return anyone else&apos;s, whatever this page asks for.
-        </p>
-      </div>
+      <p className="text-sm text-white/40">Signed in as {user?.email}.</p>
 
       {error && (
         <p className="rounded-lg bg-amber-500/10 p-4 text-sm text-amber-200 ring-1 ring-amber-500/30">

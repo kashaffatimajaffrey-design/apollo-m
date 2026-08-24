@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { createClient, hasSupabaseEnv } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { getCommunities } from "@/lib/data";
 import { addToWatchlist } from "./auth/actions";
 import { ALERT_STYLE, type Community } from "@/lib/types";
 
@@ -18,8 +19,6 @@ import { ALERT_STYLE, type Community } from "@/lib/types";
  * anything the RLS policies would not allow.
  */
 
-export const dynamic = "force-dynamic";
-
 function Pill({ alert }: { alert: Community["alert"] }) {
   return (
     <span
@@ -31,16 +30,11 @@ function Pill({ alert }: { alert: Community["alert"] }) {
 }
 
 async function Summary() {
-  if (!hasSupabaseEnv())
-    return <SetupHint message="No Supabase credentials found." />;
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("community_latest")
-    .select("alert, total_comments");
-
-  if (error) return <SetupHint message={error.message} />;
-
-  const rows = data ?? [];
+  // Same cached read as the table below. Calling it twice costs one fetch:
+  // within a render both calls resolve from the same cache entry.
+  const result = await getCommunities();
+  if (!result.ok) return <SetupHint message={result.reason} />;
+  const rows = result.rows;
   const comments = rows.reduce((n, r) => n + (r.total_comments ?? 0), 0);
   const critical = rows.filter((r) => r.alert === "CRITICAL").length;
   const high = rows.filter((r) => r.alert === "HIGH").length;
@@ -68,22 +62,21 @@ async function Summary() {
 }
 
 async function CommunityTable() {
-  if (!hasSupabaseEnv())
-    return <SetupHint message="No Supabase credentials found." />;
+  // Two reads with deliberately different lifetimes. The community rows are the
+  // same for everyone and change only when the pipeline runs, so they come from
+  // the cached, cookie-free path. The watchlist is this visitor's own and must
+  // never be cached, so it keeps the request-scoped client.
   const supabase = await createClient();
-  const [{ data, error }, { data: watched }] = await Promise.all([
-    supabase
-      .from("community_latest")
-      .select("*")
-      .order("community_health_index", { ascending: true })
-      .returns<Community[]>(),
+  const [result, { data: watched }] = await Promise.all([
+    getCommunities(),
     // Returns [] when signed out — the select policy scopes it to auth.uid(),
     // so no branch on the session is needed here.
     supabase.from("watchlist").select("subreddit"),
   ]);
 
-  if (error) return <SetupHint message={error.message} />;
-  if (!data?.length)
+  if (!result.ok) return <SetupHint message={result.reason} />;
+  const data = result.rows;
+  if (!data.length)
     return (
       <SetupHint message="No rows yet — point database/db_setup.py at this project." />
     );

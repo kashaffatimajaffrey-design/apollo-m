@@ -1,13 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./auth/actions";
-
-// Every route reads the session, so nothing here can be prerendered at build
-// time. Declaring it on the layout also means `next build` succeeds on a clone
-// with no Supabase credentials yet, instead of failing while prerendering.
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "APOLLO-M — Community Instability",
@@ -15,10 +11,21 @@ export const metadata: Metadata = {
     "Community instability scores from the APOLLO-M pipeline, served from Supabase Postgres.",
 };
 
-/** Server Component: the session is read on the server, so the header is
- *  correct in the first byte of HTML rather than flickering from signed-out to
- *  signed-in once client JavaScript hydrates. */
-async function Nav() {
+/**
+ * The only part of the chrome that depends on who is asking.
+ *
+ * Reading the session touches cookies, which makes this scope request-bound.
+ * Isolating it is what lets everything around it — the whole nav frame, the
+ * page shell, the footer — be prerendered once and reused, while this streams
+ * in per visitor. Before Cache Components the layout carried
+ * `dynamic = "force-dynamic"`, which pinned every route to per-request
+ * rendering for the sake of these two elements.
+ *
+ * Still a Server Component: the session is resolved on the server, so the
+ * header arrives correct rather than flickering signed-out to signed-in on
+ * hydration.
+ */
+async function SessionControls() {
   // A missing or wrong Supabase config should degrade to the signed-out header,
   // not a 500 on every route. The page body reports the real problem.
   let user = null;
@@ -31,6 +38,26 @@ async function Nav() {
     user = null;
   }
 
+  return user ? (
+    <>
+      <span className="text-white/40">{user.email}</span>
+      <form action={signOut}>
+        <button className="rounded-md px-3 py-1.5 ring-1 ring-white/15 hover:bg-white/5">
+          Sign out
+        </button>
+      </form>
+    </>
+  ) : (
+    <Link
+      href="/login"
+      className="rounded-md bg-emerald-500 px-3 py-1.5 font-medium text-black hover:bg-emerald-400"
+    >
+      Sign in
+    </Link>
+  );
+}
+
+function Nav() {
   return (
     <header className="border-b border-white/10">
       <nav className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-4">
@@ -47,23 +74,18 @@ async function Nav() {
           Watchlist
         </Link>
         <div className="ml-auto flex items-center gap-3 text-sm">
-          {user ? (
-            <>
-              <span className="text-white/40">{user.email}</span>
-              <form action={signOut}>
-                <button className="rounded-md px-3 py-1.5 ring-1 ring-white/15 hover:bg-white/5">
-                  Sign out
-                </button>
-              </form>
-            </>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-md bg-emerald-500 px-3 py-1.5 font-medium text-black hover:bg-emerald-400"
-            >
-              Sign in
-            </Link>
-          )}
+          {/* Reserves the button's height so the nav does not shift when the
+              session resolves. */}
+          <Suspense
+            fallback={
+              <span
+                className="h-[34px] w-20 rounded-md bg-white/5"
+                aria-hidden="true"
+              />
+            }
+          >
+            <SessionControls />
+          </Suspense>
         </div>
       </nav>
     </header>

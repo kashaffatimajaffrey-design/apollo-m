@@ -25,6 +25,33 @@ data-fetching JavaScript and never holds a database client. The header knows whe
 are signed in before the first byte of HTML, so there is no signed-out flash while
 hydration catches up.
 
+**Partial prerendering, via Cache Components.** `next.config.ts` sets
+`cacheComponents: true`, and every route builds as `◐ (Partial Prerender)` — a static
+HTML shell with the request-bound parts streamed in:
+
+```
+Route (app)           Revalidate  Expire
+┌ ◐ /                         1h      1d
+├ ◐ /login
+└ ◐ /watchlist
+```
+
+Getting there meant deleting `dynamic = "force-dynamic"` and saying what is actually
+dynamic instead. Two things were: the session in the header, and the watchlist query.
+Both now sit behind their own `<Suspense>` boundary, so the nav frame, page shell and
+footer prerender once and are reused, while the per-visitor parts stream. Measured on
+the production build: **first byte 4 ms warm, 30 ms cold.**
+
+The community data is cached with `use cache` (`src/lib/data.ts`) because it is the
+same for every visitor and changes only when the pipeline runs — `cacheLife('hours')`
+bounds staleness, and `cacheTag` makes that a backstop rather than the mechanism, since
+`POST /api/revalidate` lets a pipeline run invalidate it immediately.
+
+That forced a distinction worth having: a cached scope cannot touch request state, so
+public reference data reads through a cookie-free client (`supabase/public.ts`) and
+per-user data keeps the request-scoped one. The world-readable rows were previously
+being fetched through the caller's session for no reason.
+
 **Streaming, in two independent boundaries.** `src/app/page.tsx` sends the page shell
 immediately and puts the summary and the table behind separate `<Suspense>` boundaries,
 so each flushes when its own query returns rather than the fast one waiting on the slow
