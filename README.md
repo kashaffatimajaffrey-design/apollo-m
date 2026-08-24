@@ -87,10 +87,30 @@ Reddit hyperlink graph must be downloaded separately to recompute polarisation.
 | `main.py` | Pipeline layers: micro, meso, unsupervised, macro, alerts |
 | `simulate_data.py` / `validate_simulation.py` | Benchmark generation and ground-truth validation |
 | `models/tft_forecaster.py` | Temporal Fusion Transformer, p10/p50/p90 |
-| `api/` · `dashboard/` | FastAPI backend · Streamlit dashboard |
+| `api/` · `dashboard/` | FastAPI backend · Streamlit analyst dashboard |
+| `web/` | Public web surface — Next.js App Router on Supabase ([README](web/README.md)) |
 | `monitoring/` | Prometheus exporter + provisioned Grafana dashboard |
 | `llm/` | Explanation layer (Ollama / Claude, template fallback) |
 | `docs/APOLLO_Technical_Report.md` | Full report — §7.1 data provenance, §11 status |
+
+## Three surfaces, one database
+
+The pipeline writes community health scores to Postgres once. Everything that
+reads them reads the same rows — there is no export, no copy and nothing to fall
+out of sync.
+
+| Surface | Stack | For |
+|---|---|---|
+| [Analyst dashboard](https://apollo-m.streamlit.app) | Streamlit + Plotly | Dense, stateful, behind a login |
+| [REST API](https://apollo-api-tllm.onrender.com/docs) | FastAPI + JWT | Programmatic access, three roles |
+| [`web/`](web/README.md) | Next.js 16 App Router, React 19, Supabase | Public, server-rendered, no login needed to read |
+| [Monitoring](monitoring/) | Prometheus + Grafana | Operational metrics |
+
+`web/` is the one to read for frontend work: React Server Components, streaming
+SSR across two independent Suspense boundaries, auth as Server Actions that work
+without JavaScript, and row-level security as the actual authorisation boundary
+rather than an app-layer check. Its own CI runs type safety, Prettier, ESLint,
+build and a Playwright suite with no secrets in the runner.
 
 ## Deployment
 
