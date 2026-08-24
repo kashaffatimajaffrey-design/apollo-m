@@ -1,8 +1,30 @@
 @import "tailwindcss";
 
+/*
+ * The app commits to a single dark palette rather than following the system
+ * preference. Every component is written against a dark ground —
+ * `text-white/60`, `bg-white/5`, `divide-white/5` — so a light background does
+ * not produce a light theme, it produces unreadable text on white.
+ *
+ * This file previously carried create-next-app's boilerplate: light tokens with
+ * a `prefers-color-scheme: dark` override. Two things made that actively
+ * harmful rather than merely unused:
+ *
+ *   1. The `body` rule below is unlayered, and unlayered CSS outranks
+ *      Tailwind's layered utilities regardless of specificity. So it beat the
+ *      `bg-[#0b0f14]` utility on <body> — the utility never had a chance.
+ *   2. Because the override keyed on the system preference, the page rendered
+ *      correctly on a machine set to dark and white-on-white on one set to
+ *      light. It looked fine right up until someone else opened it.
+ *
+ * `color-scheme: dark` is what tells the browser to render form controls,
+ * scrollbars and the canvas behind the page in dark too, so there is no white
+ * flash before first paint.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0b0f14;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +34,8 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }

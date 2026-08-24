@@ -94,3 +94,28 @@ test("no cell renders NaN", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("body")).not.toContainText("NaN");
 });
+
+test("the dark palette survives a light-mode system preference", async ({
+  page,
+}) => {
+  // Regression guard. globals.css shipped create-next-app's boilerplate — light
+  // tokens plus a prefers-color-scheme:dark override — and that unlayered `body`
+  // rule outranked Tailwind's layered `bg-[#0b0f14]` utility. Every component is
+  // written for a dark ground, so on a machine set to light the page rendered
+  // near-white text on white. It looked correct on any dark-mode machine, which
+  // is why reading the text instead of the pixels missed it.
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+
+  const bg = await page
+    .locator("body")
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  // Parse rather than string-match, so an equivalent notation still passes.
+  const [r, g, b] = bg.match(/\d+/g)!.map(Number);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  expect(
+    luminance,
+    `body background was ${bg}, which is not dark`,
+  ).toBeLessThan(0.25);
+});

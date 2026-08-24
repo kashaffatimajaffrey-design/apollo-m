@@ -77,7 +77,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#0b0f14] text-white antialiased">
+      {/* Background and text colour come from globals.css, which owns the
+          palette — setting them here as well gave two sources of truth, and the
+          stylesheet silently won. */}
+      <body className="min-h-screen antialiased">
         <Nav />
         <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
         <footer className="mx-auto max-w-5xl px-6 pb-10 text-xs text-white/30">
