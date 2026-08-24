@@ -33,13 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: '22', cache: npm, cache-dependency-path: web/package-lock.json}
+        with: {node-version: '24', cache: npm, cache-dependency-path: web/package-lock.json}
       - name: Preflight — prove where we are before npm runs
         run: |
           echo "pwd: $(pwd)"
           echo "node: $(node -v)  npm: $(npm -v)"
           ls -la package.json package-lock.json
-      - run: npm ci
+      - name: Install
+        run: npm ci || (echo "----- npm debug log -----"; cat "$HOME/.npm/_logs/"*.log; exit 1)
       - name: Type safety
         run: npx tsc --noEmit
       - name: Format (Prettier)
@@ -57,13 +58,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: '22', cache: npm, cache-dependency-path: web/package-lock.json}
+        with: {node-version: '24', cache: npm, cache-dependency-path: web/package-lock.json}
       - name: Preflight — prove where we are before npm runs
         run: |
           echo "pwd: $(pwd)"
           echo "node: $(node -v)  npm: $(npm -v)"
           ls -la package.json package-lock.json
-      - run: npm ci
+      - name: Install
+        run: npm ci || (echo "----- npm debug log -----"; cat "$HOME/.npm/_logs/"*.log; exit 1)
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - name: End-to-end smoke tests
