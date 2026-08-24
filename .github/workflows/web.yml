@@ -33,7 +33,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: '24', cache: npm, cache-dependency-path: web/package-lock.json}
+        # No `cache: npm`. setup-node saves ~/.npm in a post step even when the
+        # job failed, and restores through prefix keys, so a cache poisoned by
+        # an early failing run outlives the lockfile change that should have
+        # invalidated it. A clean clone installs in ~20s over the network; that
+        # is cheaper than a cache that can make every future run fail for a
+        # reason nothing in the repository explains.
+        with: {node-version: '24'}
       - name: Preflight — prove where we are before npm runs
         run: |
           echo "pwd: $(pwd)"
@@ -58,7 +64,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: '24', cache: npm, cache-dependency-path: web/package-lock.json}
+        # No `cache: npm`. setup-node saves ~/.npm in a post step even when the
+        # job failed, and restores through prefix keys, so a cache poisoned by
+        # an early failing run outlives the lockfile change that should have
+        # invalidated it. A clean clone installs in ~20s over the network; that
+        # is cheaper than a cache that can make every future run fail for a
+        # reason nothing in the repository explains.
+        with: {node-version: '24'}
       - name: Preflight — prove where we are before npm runs
         run: |
           echo "pwd: $(pwd)"
