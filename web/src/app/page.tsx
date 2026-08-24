@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isConfigured } from "@/lib/supabase/env";
 import { getCommunities } from "@/lib/data";
 import { addToWatchlist } from "./auth/actions";
 import { ALERT_STYLE, type Community } from "@/lib/types";
@@ -61,17 +62,32 @@ async function Summary() {
   );
 }
 
+/**
+ * The signed-in visitor's watched subreddits, or none.
+ *
+ * Guarded on configuration because constructing the Supabase client throws
+ * when the environment is empty, and an unconfigured clone must still render.
+ * That case is not hypothetical — CI runs with no Supabase secrets on purpose,
+ * so this is the path it exercises.
+ *
+ * Returns [] when signed out without branching on the session: the select
+ * policy scopes rows to auth.uid(), so the database answers that question.
+ */
+async function watchedSubreddits(): Promise<string[]> {
+  if (!isConfigured) return [];
+  const supabase = await createClient();
+  const { data } = await supabase.from("watchlist").select("subreddit");
+  return (data ?? []).map((w) => w.subreddit);
+}
+
 async function CommunityTable() {
   // Two reads with deliberately different lifetimes. The community rows are the
   // same for everyone and change only when the pipeline runs, so they come from
   // the cached, cookie-free path. The watchlist is this visitor's own and must
   // never be cached, so it keeps the request-scoped client.
-  const supabase = await createClient();
-  const [result, { data: watched }] = await Promise.all([
+  const [result, watched] = await Promise.all([
     getCommunities(),
-    // Returns [] when signed out — the select policy scopes it to auth.uid(),
-    // so no branch on the session is needed here.
-    supabase.from("watchlist").select("subreddit"),
+    watchedSubreddits(),
   ]);
 
   if (!result.ok) return <SetupHint message={result.reason} />;
@@ -81,7 +97,7 @@ async function CommunityTable() {
       <SetupHint message="No rows yet — point database/db_setup.py at this project." />
     );
 
-  const onList = new Set((watched ?? []).map((w) => w.subreddit));
+  const onList = new Set(watched);
 
   return (
     <div className="overflow-x-auto rounded-lg ring-1 ring-white/10">

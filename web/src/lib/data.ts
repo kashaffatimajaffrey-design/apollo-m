@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { publicClient } from "@/lib/supabase/public";
+import { getPublicClient } from "@/lib/supabase/public";
 import { isConfigured } from "@/lib/supabase/env";
 import type { Community } from "@/lib/types";
 
@@ -42,7 +42,7 @@ export async function getCommunities(): Promise<CommunitiesResult> {
   if (!isConfigured)
     return { ok: false, reason: "No Supabase credentials found." };
 
-  const { data, error } = await publicClient
+  const { data, error } = await getPublicClient()
     .from("community_latest")
     // One literal rather than a concatenation: supabase-js infers the row type
     // from the select string, and a runtime-built string erases that inference.
