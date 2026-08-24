@@ -15,6 +15,13 @@ ROLE/DATABASE rights:
 
   DATABASE_URL="postgresql://user:pass@host:5432/apollo_db" python database/db_setup.py
 
+On Supabase, use the SESSION pooler string (Connect -> Session pooler), not the
+direct one: the direct host resolves to IPv6 only, so it works on some machines
+and not others. Not the transaction pooler either — search_path is set on the
+connection below so the unqualified CREATE TABLEs in schema.sql land in the
+apollo schema, and transaction mode returns the connection to the pool after
+each transaction, which does not guarantee that session state persists.
+
 Use the EXTERNAL connection string when running this from your machine; Render's
 internal URL only resolves inside its network. Never commit that string.
 """

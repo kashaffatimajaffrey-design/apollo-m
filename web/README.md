@@ -76,9 +76,23 @@ cp .env.example .env.local     # from Supabase → Settings → API
 
    ```bash
    cd ..
-   DATABASE_URL="postgresql://postgres:PASSWORD@db.<ref>.supabase.co:5432/postgres" \
+   DATABASE_URL="postgresql://postgres.<ref>:PASSWORD@aws-1-<region>.pooler.supabase.com:5432/postgres" \
      python database/db_setup.py
    ```
+
+   Copy that string from **Connect → Session pooler** in the Supabase dashboard.
+   Which connection you pick matters:
+
+   - The **direct** connection (`db.<ref>.supabase.co:5432`) resolves to IPv6 only.
+     It works on a machine that has IPv6 and fails everywhere else, which makes it
+     a poor default even though the dashboard shows it first.
+   - The **session** pooler is the IPv4 drop-in, and it is what this step needs.
+     `db_setup.py` sets `search_path` on the connection so the unqualified
+     `CREATE TABLE`s in `database/schema.sql` land in the `apollo` schema, and that
+     is session state.
+   - The **transaction** pooler (port 6543) returns the connection to the pool after
+     every transaction, so session state is not guaranteed to survive between them.
+     It is the right choice for short-lived serverless queries, not for this.
 
 3. Run `supabase/schema.sql` in the Supabase SQL editor. It adds the read model and the
    watchlist on top of what step 2 created.
