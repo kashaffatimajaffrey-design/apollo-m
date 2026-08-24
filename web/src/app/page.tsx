@@ -156,8 +156,8 @@ function SetupHint({ message }: { message: string }) {
       <p className="font-medium">Supabase is not answering yet.</p>
       <p className="mt-1 text-amber-200/70">{message}</p>
       <p className="mt-2 text-amber-200/70">
-        Apply <code>supabase/schema.sql</code>, then run{" "}
-        <code>npm run seed</code>. See the README.
+        Point <code>database/db_setup.py</code> at this project, then apply{" "}
+        <code>web/supabase/schema.sql</code>. See the README.
       </p>
     </div>
   );

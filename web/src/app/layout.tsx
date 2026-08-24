@@ -10,7 +10,7 @@ import { signOut } from "./auth/actions";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "APOLLO Watch",
+  title: "APOLLO-M — Community Instability",
   description:
     "Community instability scores from the APOLLO-M pipeline, served from Supabase Postgres.",
 };
@@ -35,7 +35,7 @@ async function Nav() {
     <header className="border-b border-white/10">
       <nav className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-4">
         <Link href="/" className="font-semibold tracking-tight">
-          APOLLO <span className="text-emerald-400">Watch</span>
+          APOLLO<span className="text-emerald-400">-M</span>
         </Link>
         <Link href="/" className="text-sm text-white/60 hover:text-white">
           Communities
