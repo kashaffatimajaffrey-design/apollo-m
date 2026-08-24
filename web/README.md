@@ -3,6 +3,8 @@
 The public web surface of [APOLLO-M](../README.md), built with the Next.js App Router
 on Supabase.
 
+**Live: [apollo-m.vercel.app](https://apollo-m.vercel.app)**
+
 It is not a separate product and it does not hold its own copy of anything. The
 pipeline writes community health scores to Postgres; the Streamlit analyst dashboard,
 the FastAPI service and this app all read the same rows from the same database. This

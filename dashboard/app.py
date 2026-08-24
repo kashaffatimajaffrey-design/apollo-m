@@ -58,6 +58,12 @@ import os as _os
 
 API_URL = _os.getenv("APOLLO_API_URL", "https://apollo-api-tllm.onrender.com").rstrip("/")
 CEREBRO_URL = _os.getenv("CEREBRO_URL", "https://cerebro-sandy-beta.vercel.app").rstrip("/")
+# The public web surface (web/, Next.js on Supabase). Reads the same rows this
+# dashboard reads, so the two never disagree — this one is the analyst tool,
+# that one is the read-only view anybody can open without an account.
+# Deliberately the production alias: Vercel's per-deployment URLs sit behind
+# deployment protection and change on every build.
+WEB_URL = _os.getenv("APOLLO_WEB_URL", "https://apollo-m.vercel.app").rstrip("/")
 # Grafana and Prometheus default to the local ports because that is where they
 # actually run: the demo is presented from the machine hosting them, and there
 # the links open the real dashboards. They are shown with a note rather than
@@ -234,6 +240,7 @@ with st.sidebar:
                              "but needs `ollama serve` + a pulled model running.")
     st.divider()
     st.markdown("**Connected systems**")
+    st.link_button("🌍 Public web view", WEB_URL, use_container_width=True)
     st.link_button("🛰️ Open CEREBRO", CEREBRO_URL,
                    use_container_width=True)
     st.link_button("📊 Grafana", GRAFANA_URL, use_container_width=True)

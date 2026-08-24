@@ -103,7 +103,7 @@ out of sync.
 |---|---|---|
 | [Analyst dashboard](https://apollo-m.streamlit.app) | Streamlit + Plotly | Dense, stateful, behind a login |
 | [REST API](https://apollo-api-tllm.onrender.com/docs) | FastAPI + JWT | Programmatic access, three roles |
-| [`web/`](web/README.md) | Next.js 16 App Router, React 19, Supabase | Public, server-rendered, no login needed to read |
+| [Public web view](https://apollo-m.vercel.app) | Next.js 16 App Router, React 19, Supabase | Server-rendered, no login needed to read ([source](web/README.md)) |
 | [Monitoring](monitoring/) | Prometheus + Grafana | Operational metrics |
 
 `web/` is the one to read for frontend work: React Server Components, streaming
