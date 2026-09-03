@@ -34,7 +34,8 @@ async function Summary() {
   // Same cached read as the table below. Calling it twice costs one fetch:
   // within a render both calls resolve from the same cache entry.
   const result = await getCommunities();
-  if (!result.ok) return <SetupHint message={result.reason} />;
+  if (!result.ok)
+    return <SetupHint message={result.reason} hint={result.hint} />;
   const rows = result.rows;
   const comments = rows.reduce((n, r) => n + (r.total_comments ?? 0), 0);
   const critical = rows.filter((r) => r.alert === "CRITICAL").length;
@@ -90,11 +91,15 @@ async function CommunityTable() {
     watchedSubreddits(),
   ]);
 
-  if (!result.ok) return <SetupHint message={result.reason} />;
+  if (!result.ok)
+    return <SetupHint message={result.reason} hint={result.hint} />;
   const data = result.rows;
   if (!data.length)
     return (
-      <SetupHint message="No rows yet — point database/db_setup.py at this project." />
+      <SetupHint
+        message="No rows yet."
+        hint="The project and table exist but are empty. Run database/db_setup.py against this project."
+      />
     );
 
   const onList = new Set(watched);
@@ -164,15 +169,19 @@ async function CommunityTable() {
   );
 }
 
-function SetupHint({ message }: { message: string }) {
+/**
+ * The degraded state, with the remedy that matches the failure.
+ *
+ * `hint` is chosen by describeFailure() from the driver's own error rather than
+ * hardcoded here, because the fix for an unreachable host and the fix for a
+ * missing table have nothing in common.
+ */
+function SetupHint({ message, hint }: { message: string; hint?: string }) {
   return (
     <div className="rounded-lg bg-amber-500/10 p-4 text-sm text-amber-200 ring-1 ring-amber-500/30">
       <p className="font-medium">Supabase is not answering yet.</p>
       <p className="mt-1 text-amber-200/70">{message}</p>
-      <p className="mt-2 text-amber-200/70">
-        Point <code>database/db_setup.py</code> at this project, then apply{" "}
-        <code>web/supabase/schema.sql</code>. See the README.
-      </p>
+      {hint ? <p className="mt-2 text-amber-200/70">{hint}</p> : null}
     </div>
   );
 }
