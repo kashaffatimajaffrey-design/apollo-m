@@ -1,6 +1,6 @@
 # Audit paper
 
-*Auditing a Community-Health Index Against Constructed Ground Truth: A Case Study.*
+*A Known-Answer Audit for Deployed Measurement Systems: Procedure and a Case Study.*
 
 | File | Purpose |
 |---|---|
@@ -22,6 +22,6 @@ python docs/paper/make_paper_figures.py
 python docs/paper/build_pdf.py
 ```
 
-`data/apollo_daily.csv` (written by `simulate_data.py`) is needed for Table 4's
-OLS rows and Figure 7(a). Without it the scripts fall back to the pre-built
-Figure 7 and skip the OLS rows, and say so.
+`data/apollo_daily.csv` (written by `simulate_data.py`, committed) feeds Table 4's
+OLS rows and Figure 7(a). If it is ever removed the scripts fall back to the
+pre-built Figure 7, skip the OLS rows, and say so.

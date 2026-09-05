@@ -19,7 +19,7 @@ from playwright.sync_api import sync_playwright
 HERE = Path(__file__).resolve().parent
 SRC = HERE / "paper.html"
 OUT = HERE / "paper.pdf"
-TITLE = "Auditing a Community-Health Index Against Constructed Ground Truth: A Case Study"
+TITLE = "A Known-Answer Audit for Deployed Measurement Systems: Procedure and a Case Study"
 AUTHOR = "Kashaf Fatima"
 
 FOOTER = (

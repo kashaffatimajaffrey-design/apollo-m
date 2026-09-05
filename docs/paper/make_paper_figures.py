@@ -247,6 +247,7 @@ if daily_path.exists() and "ols_full" in t4:
     b.set_ylim(0, 1.08)
     b.set_ylabel("slope ROC-AUC")
     b.set_title("(b) Deep model vs. a straight line", fontsize=9.5)
+    b.tick_params(axis="x", labelsize=8)
     fig.tight_layout()
     save(fig, "fig07_trajectories.png")
 else:

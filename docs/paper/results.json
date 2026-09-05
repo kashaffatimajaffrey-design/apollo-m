@@ -86,6 +86,28 @@
         0.849
       ]
     },
+    "ols_full": {
+      "auc": 1.0,
+      "ci": [
+        1.0,
+        1.0
+      ]
+    },
+    "ols_last30": {
+      "auc": 0.999,
+      "ci": [
+        0.991,
+        1.0
+      ]
+    },
+    "ols_full_minus_tft": {
+      "delta": 0.268,
+      "ci": [
+        0.151,
+        0.399
+      ],
+      "p_gt_0": 1.0
+    },
     "tft_recall": "15/15",
     "tft_mean_slope_by_trajectory": {
       "destabilising": 0.00235,
