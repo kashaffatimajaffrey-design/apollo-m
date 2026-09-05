@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Known-Answer Audit for Deployed Measurement Systems: Procedure and a Case Study</title>
+<style>
+  @page { size: A4; margin: 22mm 20mm 24mm 20mm; }
+  html { font-size: 10.5pt; }
+  body { font-family: "Liberation Serif", "Times New Roman", serif; line-height: 1.38; color: #111; margin: 0; }
+  h1.title { font-size: 17pt; text-align: center; margin: 0 0 8pt; line-height: 1.25; }
+  .author { text-align: center; font-size: 11pt; margin: 0; }
+  .affil { text-align: center; font-size: 9.5pt; margin: 2pt 0 0; color: #333; }
+  .keywords { font-size: 9.5pt; margin: 10pt 0 0; }
+  h2 { font-size: 12.5pt; margin: 18pt 0 6pt; border-bottom: 0.6pt solid #999; padding-bottom: 2pt; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12pt 0 4pt; font-style: italic; break-after: avoid; }
+  h2.abstract { border: 0; font-size: 12pt; text-align: left; margin-top: 14pt; }
+  p { margin: 0 0 6pt; text-align: justify; orphans: 3; widows: 3; }
+  ol, ul { margin: 0 0 6pt; padding-left: 20pt; }
+  li { margin-bottom: 3pt; text-align: justify; }
+  code, pre { font-family: "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 8.8pt; }
+  pre { background: #f4f4f4; padding: 6pt 8pt; margin: 4pt 0 8pt; border: 0.4pt solid #ccc; }
+  .eq { text-align: center; font-style: italic; margin: 6pt 0 8pt; }
+  .eq .no { float: right; font-style: normal; }
+  figure { margin: 10pt 0 12pt; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+  figure img { max-width: 100%; height: auto; }
+  figcaption { font-size: 9.2pt; text-align: justify; margin-top: 5pt; line-height: 1.3; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.3pt; margin: 4pt 0 10pt; break-inside: avoid; page-break-inside: avoid; }
+  th, td { border-top: 0.4pt solid #888; border-bottom: 0.4pt solid #888; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; font-weight: bold; }
+  .tcap { font-size: 9.3pt; font-weight: bold; margin: 8pt 0 3pt; break-after: avoid; }
+  .num { text-align: right; white-space: nowrap; }
+  .refs p { font-size: 9.2pt; text-align: left; padding-left: 22pt; text-indent: -22pt; margin-bottom: 4pt; }
+  .w55 { width: 55%; margin: 0 auto; }
+  .w60 { width: 62%; margin: 0 auto; }
+  .w80 { width: 82%; margin: 0 auto; }
+  .w90 { width: 92%; margin: 0 auto; }
+  .w100 { width: 100%; }
+  .small { font-size: 9.3pt; }
+</style>
+</head>
+<body>
+
+<h1 class="title">A Known-Answer Audit for Deployed Measurement Systems:<br>Procedure and a Case Study</h1>
+<p class="author">Kashaf Fatima</p>
+<p class="affil">Department of Computer Science, Bahria University, Karachi Campus</p>
+
+<h2 class="abstract">Abstract</h2>
+<p>Systems that rank online communities by "health" are deployed without any way to check whether the ranking measures what it is used for. The index emits plausible numbers, the dashboard orders communities by them, and nothing in the pipeline can detect that the ordering is wrong, because no ground truth exists against which "wrong" could be defined. This is a construct-validity failure of the kind Jacobs and Wallach [1] describe as endemic in computational measurement, and it is invisible to the testing practices that production machine-learning systems normally apply [2], [3].</p>
+<p>We describe a lightweight audit procedure for such systems and report what it found when applied to one deployed community-health pipeline. The procedure constructs a benchmark in which the answer is recorded in advance and withheld from every pipeline stage, then subjects each component of the index, and the composite, to the same known-answer test. A planted signal can only test whether an instrument detects what it was built to detect; we therefore treat the benchmark as a test instrument, never as evidence about online communities.</p>
+<p>Applied to a five-layer pipeline serving a live dashboard, the audit surfaced four defects invisible from the system's outputs. (1) Two of the health index's four components are constant for 42 of 60 scored communities, so 45% of the index's weight is inert for 70% of its population. (2) A third component separates the classes at chance (AUC 0.498). (3) The four-component composite does not measurably outperform its single strongest input (paired ΔAUC, toxicity minus composite, +0.075; 95% CI [−0.027, +0.203]). (4) The pipeline's Temporal Fusion Transformer [4] recovers the planted trajectory at slope AUC 0.732 (95% CI [0.601, 0.849]), while an ordinary least-squares slope over the same daily series recovers it at 1.000 (paired ΔAUC +0.268, 95% CI [+0.151, +0.399]): the deep model underperforms a one-line baseline on the task it was adopted to perform, echoing findings in recommendation [5] and forecasting [6].</p>
+<p>On a real corpus of 116,853 comments across 24 communities, ranking by the present-state index and by a trend-aware score agree only weakly (Spearman ρ = 0.383, p = 0.065; 13 of 24 communities move five or more places), and the two top-five lists share only two members. The instrument choice materially changes the moderation queue.</p>
+<p>None of these defects was visible before the audit and all four are actionable. The first is detectable by counting distinct values alone, and the procedure's checklist gives label-free checks for the rest. We give the procedure as a seven-item checklist, release the code and data, and argue that measurement audits of this kind are cheap enough to be routine and are currently almost never run.</p>
+<p class="keywords"><b>Keywords:</b> measurement validity, algorithmic auditing, community health, toxicity, known-answer testing, strong baselines, Temporal Fusion Transformer.</p>
+
+<h2>1. Introduction</h2>
+<h3>1.1 The problem</h3>
+<p>Composite "community health" indices are used to decide where moderation attention goes. A typical index combines a toxicity rate, one or more graph-derived structural measures, and a churn statistic into a single score, and a dashboard ranks communities by it. Platforms and researchers have built many such measures [7], [8], [9], and moderator-facing tooling increasingly surfaces them [10].</p>
+<p>Such an index is a measuring instrument, and measuring instruments can be wrong in ways their outputs do not reveal. An index that silently substitutes a default value for two of its four components still emits a number in the expected range. A composite that adds nothing to its best component still produces a plausible ordering. A forecasting model that underperforms a linear fit still returns forecasts with well-formed confidence bands. In each case the system's outputs look correct, the dashboard renders, and no test fails. Sculley et al. [2] catalogue this class of silent degradation as a defining hazard of production machine-learning systems, and Breck et al. [3] propose production readiness tests that nonetheless do not reach measurement validity.</p>
+<p>The reason these defects persist is not carelessness. It is that validating a community-health ranking requires knowing which communities actually deteriorated and when, and no public dataset supplies those labels. Chandrasekharan et al. [7] obtained a rare quantitative handle on community-level intervention by exploiting a single documented ban event; Zhang et al. [11] obtained trajectory labels at conversation level only through substantial human annotation with topic-matched controls. Absent comparable labels, teams validate what they can: unit tests, schema checks, plausibility of rendered numbers. None of these can detect a construct-validity failure [1].</p>
+
+<h3>1.2 The audit stance</h3>
+<p>This paper takes a different route. Rather than seeking real labels, we construct a benchmark whose answer is recorded in advance and withheld from the pipeline, and use it as a test instrument rather than as evidence.</p>
+<p>The distinction is the paper's foundation and we state it plainly. A benchmark with a planted signal cannot tell you anything about online communities. If we plant a rising toxicity trajectory and a change-detector finds it, we have learned that our simulator plants what we claim it plants. Any paper presenting that as a finding about the world is presenting a tautology, and we do not present one.</p>
+<p>The same benchmark is, however, an excellent audit instrument, for precisely the reason it is a poor evidentiary one: the answer is known. A component that cannot recover a signal deliberately made easy to recover is broken, and we can say so without any claim about real communities. A composite that fails to beat its own strongest input, on a benchmark in which that input carries the planted signal, is not earning its complexity. A deep model beaten by a linear fit on a monotonic ramp has a problem that will not improve on messier data.</p>
+<p>Known-answer testing is standard in numerical software verification and in psychometrics, where construct validity has a sixty-year literature [12], [1]. It is largely absent from applied social computing. Algorithmic auditing has developed rapidly as a discipline [13], [14], but has concentrated on fairness and disparate impact rather than on whether an instrument measures the quantity it is used for. This paper is an argument that the latter deserves the same treatment, made by demonstration.</p>
+
+<h3>1.3 Contributions</h3>
+<ol>
+<li>An <b>audit procedure</b> for deployed community-health indices, given as a reproducible seven-item checklist (§7) of which four items require no ground truth at all.</li>
+<li>A <b>case-study report</b> of four defects the procedure surfaced in one live pipeline (§5), each with the measurement that exposed it and the code that produces it.</li>
+<li>A <b>negative result of general interest</b>: a Temporal Fusion Transformer underperforming an OLS slope by 0.27 AUC on the task it was introduced to solve (§5.4), adding a social-computing instance to a pattern documented in recommendation [5], information retrieval [15] and time-series forecasting [6].</li>
+<li>A <b>real-data demonstration</b> that present-state and trend-aware rankings of the same 24 communities agree only weakly, sharing two of five top-ranked communities (§5.6).</li>
+<li>A <b>withdrawn claim</b>. An earlier version of this work asserted that the composite index ranks below its own strongest input. Interval estimation does not support that claim at this sample size, and §5.3 reports its withdrawal rather than removing the trace.</li>
+</ol>
+
+<h3>1.4 What this paper does not claim</h3>
+<p>It makes no claim about accuracy on real community collapse, and no claim that composite indices in general are invalid. It is a single case study of a single system. The generalisable object here is the procedure, not the verdict.</p>
+
+<h2>2. Background and Related Work</h2>
+<h3>2.1 Toxicity and abusive language detection</h3>
+<p>Davidson et al. [16] separated hate speech from merely offensive language and released a corpus of 24,783 annotated tweets that remains a standard benchmark; their central finding, that lexical methods systematically confuse the two, motivated later transformer work. Wulczyn et al. [17] scaled annotation to over a hundred thousand Wikipedia discussion comments, showing crowd labels can approximate expert judgement at scale, and Founta et al. [18] characterised abusive behaviour on Twitter across overlapping categories. With pretrained language models [19], [20], per-message accuracy improved substantially; the Detoxify family [21] fine-tunes BERT on the Jigsaw corpora and supplies calibrated per-message probabilities. It provides the micro-level signal in the system audited here.</p>
+<p>The limitation common to this strand is unit and timing: these systems classify one message, in isolation, after publication. They say nothing about a community in aggregate and nothing about the future.</p>
+
+<h3>2.2 Community-level measurement</h3>
+<p>Chandrasekharan et al. [7] examined Reddit's 2015 ban of several hate-focused communities and measured the effect on the speech of their displaced members. Kumar et al. [8] studied inter-community conflict directly, analysing sentiment-weighted hyperlinks between subreddits and the mobilisation that follows. Cinelli et al. [9] compared echo-chamber formation across four platforms, showing the effect varies with platform architecture rather than being a universal property of social media. Garimella et al. [22] proposed graph-based measures for quantifying controversy in discussion networks. Danescu-Niculescu-Mizil et al. [23] showed that communities and their members change measurably over time, which underpins churn-style features. Jhaver et al. [10] documented how Reddit moderators combine human judgement with Automoderator, finding practice remains largely manual, rule-based and reactive.</p>
+<p>This literature constructs community-level measures. Our reading is that it rarely audits them: a measure is introduced, shown to correlate with something plausible, and then used downstream. We are not aware of prior work that subjects a deployed community index to a component-level known-answer test. That gap, rather than any particular index's shortcomings, is what this paper addresses.</p>
+
+<h3>2.3 Measurement and construct validity</h3>
+<p>Cronbach and Meehl [12] formalised construct validity, whether an instrument measures the theoretical quantity it is claimed to measure, and the concept is foundational in psychometrics. Jacobs and Wallach [1] imported it into machine learning, arguing that many computational measurements of social constructs are never validated at all and that the resulting failures are systematic rather than incidental. Raji et al. [13] and Metaxa et al. [14] developed algorithmic auditing into a practice, though with emphasis on fairness and disparate impact. This paper applies the construct-validity lens to a deployed community-health index and supplies a concrete procedure, which the measurement-validity literature has tended to leave abstract.</p>
+
+<h3>2.4 Trajectory forecasting and early warning</h3>
+<p>Closest in spirit is Zhang et al. [11], who predict from the opening turns of a conversation whether it will later derail into personal attack, using pragmatic cues present at the outset. Their contribution is methodological: early linguistic signal is genuinely predictive of later breakdown, so a system can act before it rather than classify after. Their unit is the conversation; the audited system's is the community. Their ground truth is human-annotated real data with topic-matched control pairs, the methodologically correct approach in this domain, and the one we recommend for any paper making claims about real communities (§12).</p>
+<p>Scheffer et al. [24] review evidence from ecology, climate and finance that complex systems exhibit measurable early-warning signals, rising variance and critical slowing down, before critical transitions. This is the theoretical grounding for supposing community instability is forecastable at all. We note that the audited system cites this literature but does not implement its statistics; no autocorrelation or variance-based indicator appears in the pipeline.</p>
+<p>Lim et al. [4] introduced the Temporal Fusion Transformer, combining recurrent processing of local dynamics with interpretable attention over longer horizons, supporting static covariates alongside time-varying inputs, and trained with a quantile loss so it emits prediction intervals rather than point estimates. Salinas et al. [25] and Oreshkin et al. [26] offer probabilistic and residual-stack alternatives. The audited system selected the TFT for its quantile outputs and attention-based auditability.</p>
+
+<h3>2.5 Strong baselines and the reproducibility of deep-learning gains</h3>
+<p>A recurring finding across applied machine learning is that carefully tuned simple baselines match or exceed reported neural results. Dacrema et al. [5] reproduced eighteen neural recommendation papers and found most were outperformed by well-configured classical methods. Lin [15] made an analogous argument in information retrieval. Makridakis et al. [6] found statistical methods competitive with or superior to machine-learning methods across the M-competition series. Our Finding 4 (§5.4) is a social-computing instance of the same pattern, and we report it in that tradition.</p>
+
+<h3>2.6 Positioning</h3>
+<p>Zhang et al. [11] establish that trajectory forecasting is achievable at conversation level. Chandrasekharan [7], Kumar [8], Cinelli [9] and Garimella [22] establish community-level measurement. Jacobs and Wallach [1] establish that such measurements are frequently unvalidated. This paper sits at the join: it supplies a procedure for validating a deployed community-level instrument, and reports the result of applying it once.</p>
+
+<h2>3. System Under Audit</h2>
+<h3>3.1 Architecture</h3>
+<p>APOLLO-M is a five-layer pipeline serving a public dashboard and REST API. Figure 1 shows its structure and, importantly, which modules are integrated into every execution versus built but not yet invoked, a distinction that bears on §5 and that the audited system itself documents.</p>
+
+<figure>
+<img class="w90" src="figures/fig01_architecture.png" alt="Architecture of the audited system">
+<figcaption><b>Figure 1.</b> Architecture of the audited system. A micro layer scores comments with <code>unitary/toxic-bert</code> [21]; a meso layer aggregates into a Community Health Index and a trend-aware instability score; an unsupervised layer clusters communities with K-Means [27] and DBSCAN [28]; a macro layer forecasts five days ahead with a Temporal Fusion Transformer [4]; an act layer emits graded alerts. Results are stored in PostgreSQL, served over an authenticated REST API, and monitored with Prometheus and Grafana. <i>Reproduced from the source project report.</i> Two labels in the diagram predate this paper: the "Davidson / Jigsaw" corpus is the 24,783-tweet Davidson et al. corpus [16], and the validation box's CHI figure of 0.575 is the system's own rounding of 0.5748; Table 2 reports 0.574 under the tie-aware computation of §4.4.</figcaption>
+</figure>
+
+<p>We audit the ranking behaviour of the meso and macro layers, since that is what the dashboard's ordering depends on and what a moderator would act on.</p>
+
+<h3>3.2 The Community Health Index</h3>
+<p>The index is a weighted penalty over four present-state quantities, each normalised to [0, 1]:</p>
+<p class="eq">CHI = 100 − (35·toxicity + 30·polarisation + 20·churn + 15·echo), clamped to [0, 100]<span class="no">(1)</span></p>
+<p>Higher CHI means healthier, so ranking for intervention takes lowest CHI first. Toxicity is the mean per-comment score over the window. Polarisation and echo-chamber are derived per community from the SNAP Reddit hyperlink network released with Kumar et al. [8]. Churn is the fraction of early-window authors absent from the late window, following the lifecycle intuition of Danescu-Niculescu-Mizil et al. [23].</p>
+<p>Critically for §5.1, the implementation falls back to a global constant when a community is absent from the hyperlink graph:</p>
+<pre>pol  = global_polarization if pol  is None else pol
+echo = global_echo         if echo is None else echo</pre>
+<p>This fallback is silent. Nothing downstream distinguishes a fitted value from a default.</p>
+
+<h3>3.3 The trend-aware instability score</h3>
+<p>The same layer computes a second, trajectory-sensitive quantity. Let τ<sub>recent</sub> be mean toxicity over the final quartile of the window and τ<sub>base</sub> the mean over the preceding period; the trend is Δτ = τ<sub>recent</sub> − τ<sub>base</sub>. Then:</p>
+<p class="eq">instability = 0.65 · clip(Δτ / 0.25, 0, 1) + 0.35 · toxicity, clamped to [0, 1]<span class="no">(2)</span></p>
+<p>The trend term dominates by design: a community that is rising is one a moderator can still act on, whereas a stably hostile one is already known.</p>
+
+<h3>3.4 Forecasting layer</h3>
+<p>The TFT [4] consumes a 14-day lookback of the daily toxicity series and emits p10/p50/p90 quantiles over a five-day horizon per community. Figure 8 shows representative outputs on the real corpus. The bands widen with horizon, as they should; an earlier build emitted constant-width bands, and that defect was corrected during development.</p>
+
+<h3>3.5 Deployment</h3>
+<p>The system is publicly reachable: a Streamlit dashboard, a Next.js server-rendered view reading from Supabase Postgres with row-level security, a FastAPI REST service with JWT authentication and OpenAPI documentation, and a Prometheus metrics endpoint. The audit was performed against the same code paths that serve these surfaces, with no modification to the pipeline.</p>
+
+<h2>4. Audit Method</h2>
+<h3>4.1 Design and stance</h3>
+<p>The study is quantitative and single-case. Its unit of analysis is the community; its measurements are threshold-free detection statistics (ROC-AUC), bootstrap interval estimates, and rank correlations between orderings. Its design is a known-answer test: a benchmark whose labels are fixed in advance and withheld from the system under test. No qualitative coding, interviews or human annotation are involved, and the one non-numerical judgement in the paper, the face-validity reading of Figure 9, is labelled as such.</p>
+<p>Evaluating a ranking of communities by destabilisation requires knowing which communities destabilised and when. No public dataset supplies those labels. Documented moderation interventions, quarantines and bans with public dates [7], are the most promising real substitute and are the subject of ongoing work (§12); they were not available at the scale required here. We therefore use a benchmark whose properties are declared in advance, and treat it strictly as an instrument (§1.2).</p>
+
+<h3>4.2 Benchmark construction</h3>
+<p>Sixty communities are generated over a shared 120-day calendar, totalling 261,337 comments. Construction maximises realism everywhere except the planted signal:</p>
+<ul>
+<li><b>Toxicity is real and text-derived.</b> A pool of 12,000 texts from the Davidson et al. corpus [16] is scored once by <code>unitary/toxic-bert</code> [21]. Every generated comment carries the genuine score for the exact text it contains; no toxicity value is invented.</li>
+<li><b>Names, author pools and volumes</b> are drawn from Reddit metadata, so labels remain recognisable.</li>
+<li><b>Trajectories are planted and recorded.</b> Fifteen communities receive a rising toxicity trajectory over the final third of the window, nine an improving one, and thirty-six are stable.</li>
+<li><b>The answer is withheld.</b> The assignment is written to <code>data/ground_truth.json</code>, which no pipeline stage reads. Recovery is therefore a measurable outcome rather than an assertion, functionally a pre-registration.</li>
+</ul>
+<p>The planted trajectory is a <b>monotonic ramp</b>. This is deliberate: an audit wants the easiest possible version of the task so that failure is unambiguous. A component that cannot find a monotonic ramp will not find anything subtler.</p>
+
+<h3>4.3 The procedure</h3>
+<figure>
+<img class="w100" src="figures/fig02_procedure.png" alt="The five-step audit">
+<figcaption><b>Figure 2.</b> The five-step audit. Steps 1 to 3 build and run the known-answer test; steps 4 and 5 are the measurements. Each measurement has a label-free counterpart in the checklist of §7 (distinct-value counts, per-component orderings, a linear-fit baseline), which is what makes four of its seven items usable without any ground truth.</figcaption>
+</figure>
+<p>The audit asks four questions, one per finding in §5.1 to §5.4:</p>
+<ol>
+<li>Does each <b>component</b> vary across the population it scores?</li>
+<li>Does each component <b>rank</b> the known answer better than chance?</li>
+<li>Does the <b>composite</b> outperform its best single component?</li>
+<li>Does the <b>deep model</b> outperform a trivial baseline on the same task?</li>
+</ol>
+
+<h3>4.4 Metrics and inference</h3>
+<p>Detection is reported as ROC-AUC, which is threshold-free and therefore insensitive to an arbitrary alert cut-off. We compute AUC via the Mann–Whitney statistic with average ranks, so that ties, abundant here given the constant components of §5.1, are handled correctly.</p>
+<p>Confidence intervals come from bootstrap resampling of communities [29]: 20,000 resamples, percentile method, seed 20260903. Paired comparisons resample once per iteration and compute both AUCs on the same resample, so the comparison accounts for correlation between signals measured on the same communities. Degenerate resamples (no positives or no negatives) are excluded under a single shared mask so paired arrays remain aligned.</p>
+
+<h2>5. What the Audit Found</h2>
+<h3>5.1 Finding 1: two of four components are constant for 70% of the population</h3>
+<figure>
+<img class="w60" src="figures/fig03_components.png" alt="Component variation and weight">
+<figcaption><b>Figure 3.</b> (a) Distinct values taken by each CHI component across the 60 scored communities. Toxicity and churn vary; polarisation and echo-chamber take only 18 distinct values. (b) The same components weighted by their share of Equation (1)'s penalty term.</figcaption>
+</figure>
+
+<p class="tcap">Table 1. CHI's four inputs, examined directly (n = 60, 15 positive).</p>
+<table>
+<tr><th>Component</th><th class="num">Weight in Eq. (1)</th><th>Distinct values</th><th class="num">Standalone AUC</th></tr>
+<tr><td>Toxicity rate</td><td class="num">35</td><td>60</td><td class="num">0.649</td></tr>
+<tr><td>Polarisation</td><td class="num">30</td><td><b>18</b> (constant for 42)</td><td class="num">0.460<sup>†</sup></td></tr>
+<tr><td>Echo-chamber index</td><td class="num">15</td><td><b>18</b> (constant for 42)</td><td class="num">0.464<sup>†</sup></td></tr>
+<tr><td>Author churn</td><td class="num">20</td><td>59</td><td class="num"><b>0.498</b></td></tr>
+</table>
+<p class="small"><sup>†</sup> Computed with 42 of 60 communities tied at the fallback constant; the value is dominated by the tie term and is reported for completeness, not interpreted.</p>
+
+<p>Polarisation and echo-chamber are derived from the SNAP hyperlink network [8], in which only 18 of the 60 benchmark communities appear. The remaining 42 receive the fallback constant of §3.2. A constant cannot contribute to a ranking, so <b>45% of the index's weight is inert for 70% of the population it scores.</b></p>
+<p>This defect is visible without any ground truth, by counting distinct values per component. It had been present in a deployed system for months, and no output of that system revealed it.</p>
+
+<h3>5.2 Finding 2: a third component ranks at chance</h3>
+<p>Author churn varies across communities and therefore looks like a live input. It separates planted from unplanted communities at AUC 0.498: chance.</p>
+<p>Combined with Finding 1, the composite is, for most of the population it scores, its toxicity term plus a chance term plus two constants. This is a structural account of the index's behaviour that requires no significance test: it follows from how the index is built and what its parts do.</p>
+
+<h3>5.3 Finding 3: the composite does not measurably beat its best input, and a claim is withdrawn</h3>
+<figure>
+<img class="w60" src="figures/fig04_roc.png" alt="ROC curves">
+<figcaption><b>Figure 4.</b> ROC curves for the three ranking signals against the withheld labels (n = 60, 15 positive).</figcaption>
+</figure>
+<figure>
+<img class="w80" src="figures/fig05_intervals.png" alt="Point estimates with intervals">
+<figcaption><b>Figure 5.</b> Point estimates with 95% bootstrap confidence intervals. Both present-state signals have intervals containing 0.5.</figcaption>
+</figure>
+
+<p class="tcap">Table 2. Detection of planted destabilisation (n = 60, 15 positive).</p>
+<table>
+<tr><th>Ranking signal</th><th class="num">ROC-AUC</th><th>95% CI</th></tr>
+<tr><td>Trend-aware instability score</td><td class="num">1.000</td><td>[1.000, 1.000]</td></tr>
+<tr><td>Raw toxicity rate</td><td class="num">0.649</td><td>[0.483, 0.803]</td></tr>
+<tr><td>Community Health Index (low-first)</td><td class="num">0.574</td><td>[0.393, 0.752]</td></tr>
+</table>
+
+<p class="tcap">Table 3. Paired differences (computed on the same resamples).</p>
+<table>
+<tr><th>Comparison</th><th class="num">Δ AUC</th><th>95% CI</th><th class="num">P(Δ &gt; 0)</th></tr>
+<tr><td>Toxicity − CHI</td><td class="num">+0.075</td><td>[−0.027, +0.203]</td><td class="num">0.910</td></tr>
+<tr><td>Instability − CHI</td><td class="num"><b>+0.426</b></td><td><b>[+0.248, +0.607]</b></td><td class="num">1.000</td></tr>
+</table>
+
+<figure>
+<img class="w100" src="figures/fig06_paired.png" alt="Bootstrap distributions of paired differences">
+<figcaption><b>Figure 6.</b> Bootstrap distributions of the paired differences. (a) The toxicity−CHI difference straddles zero. (b) The instability−CHI difference does not.</figcaption>
+</figure>
+
+<p>An earlier version of this work claimed, from point estimates alone, that the composite ranks <i>below</i> its own strongest constituent input, an appealing and counterintuitive result. <b>It does not survive interval estimation and is withdrawn.</b> At n = 60 with 15 positives the difference is +0.075 with an interval crossing zero. The direction is consistent (P = 0.910) but this is not a finding, and we report the withdrawal rather than deleting the trace, following the reporting norms argued for in [13].</p>
+<p>What the audit can say is weaker and still useful: <b>the composite fails to beat its best single component.</b> A four-input index that cannot be distinguished from one of its inputs is not earning its complexity, and Findings 1 and 2 explain why. Note also that both present-state intervals include 0.5; neither is demonstrably better than chance here.</p>
+<p>The instability score's 1.000 is reported for completeness and must not be read as performance. It measures recent-versus-baseline change (Eq. 2) and the benchmark plants a monotonic ramp; decomposing it, the toxicity-trend term alone also scores 1.000. The score finds the shape it was given. Under this paper's framing that is not a caveat to be defended but the expected behaviour of a correctly-wired instrument on a known-answer test, which is exactly why it is not offered as evidence about communities.</p>
+
+<h3>5.4 Finding 4: the deep forecaster is beaten by a straight line</h3>
+<figure>
+<img class="w100" src="figures/fig07_trajectories.png" alt="Planted ramps and slope AUC">
+<figcaption><b>Figure 7.</b> (a) Seven-day rolling mean toxicity for planted (red) and unplanted (grey) communities; the ramps are visible by eye in the final third. (b) Slope AUC for three methods against the same withheld labels.</figcaption>
+</figure>
+
+<p class="tcap">Table 4. Trajectory detection from the same daily series (n = 60, 15 positive).</p>
+<table>
+<tr><th>Method</th><th>Quantity ranked</th><th class="num">Slope AUC</th><th>95% CI</th></tr>
+<tr><td><b>OLS slope, full 120-day window</b></td><td>fit to the observed daily series</td><td class="num"><b>1.000</b></td><td>[1.000, 1.000]</td></tr>
+<tr><td>OLS slope, final 30 days only</td><td>fit to the observed daily series</td><td class="num">0.999</td><td>[0.991, 1.000]</td></tr>
+<tr><td>Temporal Fusion Transformer [4]</td><td>slope of the five-day p50 forecast path</td><td class="num">0.732</td><td>[0.601, 0.849]</td></tr>
+<tr><td><i>Paired difference, OLS (full) − TFT</i></td><td>same resamples, as in Table 3</td><td class="num">+0.268</td><td>[+0.151, +0.399]; P(Δ &gt; 0) = 1.000</td></tr>
+</table>
+
+<p><code>numpy.polyfit(t, toxicity, 1)</code>, one line, no training, no hyperparameters, recovers the planted trajectory perfectly. The TFT recovers it at 0.732. The paired difference, computed on the same resamples as Table 3, is +0.268 with a 95% interval of [+0.151, +0.399] that excludes zero in every resample, so unlike Finding 3 this gap survives interval estimation.</p>
+<p>Taken in isolation the TFT appears to work: its recall is complete (15/15 planted communities predicted rising) and its mean predicted slopes order correctly across trajectory classes (+0.00235 destabilising, +0.00092 stable, −0.00078 improving). Against a trivial baseline it does not. This is the audit's most consequential finding, and it is consistent with a broader pattern in which neural architectures are found not to beat well-configured simple methods once compared directly [5], [15], [6].</p>
+<p>We report this rather than the flattering framing because the flattering framing is the one we originally wrote. The TFT's quantile bands (Figure 8) may still justify its inclusion: a linear fit yields no calibrated uncertainty, and the deployed alerting consumes p10/p50/p90. But that is an argument for the bands, not for the point trajectory, and it was not the stated reason for adoption.</p>
+
+<figure>
+<img class="w100" src="figures/fig08_forecasts_real.png" alt="Five-day quantile forecasts on the real corpus">
+<figcaption><b>Figure 8.</b> Five-day quantile forecasts on the real corpus for the four highest-toxicity communities (r/PublicFreakout, r/politics, r/news, r/wallstreetbets). Intervals widen with horizon, as they should; this behaviour is what a linear fit cannot supply.</figcaption>
+</figure>
+
+<p><b>Caveat on comparability.</b> The two methods rank different quantities: the OLS rows fit the observed 120-day (or 30-day) history, whereas the TFT row takes the slope of the model's own five-day forecast path, as the system's <code>validate_simulation.py</code> defines it. Both are computed by the released <code>bootstrap_ci.py</code> from the committed daily series and forecasts, against the same withheld labels and on the same resamples. A like-for-like re-derivation in which the TFT is scored on the same history the OLS baseline sees remains the obvious next step (§12).</p>
+
+<h3>5.5 Behaviour on real data</h3>
+<p>The same pipeline was run on a corpus collected via Arctic Shift, the open successor to Pushshift: 116,853 comments across 24 communities and 68,043 distinct authors over 41 days (2 July to 11 August 2026), scored with the same model.</p>
+
+<figure>
+<img class="w60" src="figures/fig09_real_toxicity.png" alt="Mean toxicity by community on the real corpus">
+<figcaption><b>Figure 9.</b> Mean toxicity by community on the real corpus. The system was not given this ordering.</figcaption>
+</figure>
+
+<p>Offered as face validity only, since no labels exist for this corpus: the resulting ordering matches informed expectation without being told to, with general-news and politically-oriented communities highest and r/history, r/philosophy and r/science lowest.</p>
+<p>Two differences between the corpora matter for reading §5.1 to §5.4. First, the real corpus is the harder one: the standard deviation of community mean toxicity is 0.036 on real data (range 0.030 to 0.194) against 0.134 on the benchmark (range 0.148 to 0.692), so between-community separation that the benchmark makes easy should not be assumed to transfer. Second, graph coverage is better on real data: all 24 real communities appear in the SNAP hyperlink network and receive fitted polarisation and echo-chamber values, whereas only 18 of the 60 benchmark communities do. Finding 1's fallback rate is therefore a property of the benchmark's community roster, not of the index; the silent-fallback path itself is present on every corpus, and the audit should be re-run on any new corpus before assuming either magnitude.</p>
+
+<h3>5.6 The choice of instrument changes the queue</h3>
+<p>The preceding findings concern a constructed benchmark. This one does not, and is therefore free of the circularity discussed in §5.3.</p>
+
+<figure>
+<img class="w55" src="figures/fig10_two_orderings.png" alt="Two orderings of the same 24 communities">
+<figcaption><b>Figure 10.</b> The same 24 real communities ranked by CHI (left, the ordering the deployed dashboard presents) and by the trend-aware instability score (right). Red lines mark communities moving five or more places.</figcaption>
+</figure>
+
+<p>Ranking the real corpus by the present-state index and by the trend-aware score produces substantially different orderings:</p>
+<ul>
+<li><b>Spearman ρ = 0.383</b> (p = 0.065); <b>Kendall τ = 0.265</b></li>
+<li><b>13 of 24 communities move five or more places</b>; the largest single move is 17 places (r/changemyview, sixth by CHI and twenty-third by instability)</li>
+<li>The two <b>top-five lists share only two members</b> (r/PublicFreakout and r/politics)</li>
+</ul>
+<p>If a moderation team can act on five communities this week, the instrument determines three of the five. r/movies is eighth by CHI and first by instability; r/history is seventeenth by CHI and last by instability. The deployed dashboard sorts by CHI and labels its ordering "worst first", a description that presupposes the two questions have the same answer, which on this corpus they do not.</p>
+<p>We emphasise what this does and does not show. It does not show the trend-aware ordering is <i>correct</i>; no labels exist for this corpus. It shows that the choice is consequential, which is a precondition for the choice mattering at all, and it holds on real data.</p>
+
+<h2>6. Discussion</h2>
+<p><b>Why these defects persist.</b> All four findings share a structure: the system produced well-formed output at every stage. A constant polarisation value is a valid float. A chance-level churn feature has the right dtype and range. A composite dominated by one input still ranks. A deep model beaten by a line still emits quantiles. Sculley et al. [2] named this class of failure "hidden technical debt"; what our case adds is that the debt can sit specifically in <i>what the numbers mean</i>, where neither unit tests nor monitoring will reach it.</p>
+<p><b>What generalises and what does not.</b> The four defects are properties of one pipeline; we make no claim they recur elsewhere, and §5.5 gives a concrete reason to expect Finding 1's magnitude to differ on other corpora. What generalises is the procedure, and specifically the observation that <b>four of its seven checks need no ground truth at all.</b> Counting distinct values per component, ranking by each component alone, comparing a learned model against a linear fit, and correlating the orderings of candidate instruments are each an afternoon's work for any team with a deployed index.</p>
+<p><b>Cost.</b> The full audit, excluding benchmark generation, is roughly 200 lines of analysis code (released). Benchmark generation reuses the system's own scoring pipeline over a fixed text pool and runs in under an hour. Against the cost of a moderation queue ordered by the wrong quantity for months, this is negligible, which is our central practical argument.</p>
+<p><b>Relation to the broader baseline-reproducibility literature.</b> Finding 4 is not novel in kind. Dacrema et al. [5], Lin [15] and Makridakis et al. [6] made versions of this argument in recommendation, retrieval and forecasting respectively. Our contribution is an instance in applied social computing, obtained from a system that was already deployed rather than from a reproduction study, and framed as one output of a routine audit rather than as a dedicated investigation.</p>
+
+<h2>7. The Procedure, as a Checklist</h2>
+<p><i>Without ground truth:</i></p>
+<ol>
+<li><b>Count distinct values per component</b>, over the exact population you score. Any component constant for a large fraction contributes nothing to your ranking there. Report the fallback rate per component; if your pipeline has a default path, instrument it.</li>
+<li><b>Rank by each component alone</b> and compare orderings against the composite's. If the composite's ordering is dominated by one component, your weights are decorative.</li>
+<li><b>Compare every learned model against a trivial baseline</b> on the exact task it is deployed for: a linear fit, a moving average, last-value-carried-forward. Adopt the complex model only where it wins, and if it wins only on a secondary property such as calibrated uncertainty, say so explicitly [5], [6].</li>
+<li><b>Compare orderings under alternative instruments</b> (§5.6). Rank correlation between candidate scores costs nothing and reveals whether the instrument choice is consequential.</li>
+</ol>
+<p><i>With a constructed benchmark (roughly a day, given a scored text pool):</i></p>
+<ol start="5">
+<li><b>Plant a signal, withhold the answer from the pipeline, and test each component separately.</b> Make the planted signal easy. The purpose is not to prove the system works; it is to find parts that cannot detect even an easy signal.</li>
+<li><b>Report intervals, not point estimates</b> [29]. Two of the four findings here changed character once bootstrap intervals were computed, and one claim had to be withdrawn.</li>
+</ol>
+<p><i>Reporting discipline:</i></p>
+<ol start="7">
+<li><b>State the n behind every number.</b> One measurement in the audited system was computed on 18 communities with 5 positives while presented alongside figures from 60 with 15 (§9).</li>
+</ol>
+
+<h2>8. Threats to Validity</h2>
+<p>This section addresses ways the findings <b>as stated</b> could be wrong. Section 9 separately delimits what is not claimed at all.</p>
+<p><b>Construct validity.</b> The benchmark operationalises "destabilisation" as a monotonic rise in mean toxicity. Real deterioration is plainly richer, involving moderator load, participant departure and conflict structure [7], [8], [10]. The risk this creates is asymmetric and worth stating precisely: a component that <i>fails</i> our test might still capture something real that our operationalisation omits, so Findings 1 to 3 could understate a component's value. The converse is not available: a component that passes has only been shown to detect the simplest version of the construct. We mitigate by making the planted signal deliberately easy, which makes failure informative even though success is not.</p>
+<p><b>Internal validity.</b> Three specific hazards. First, the instability score and the benchmark share a functional form (§5.3), so its 1.000 carries no information about performance and no conclusion rests on it. Second, the OLS and TFT rows in Table 4 rank different quantities, a fit to the observed history against the slope of a five-day forecast path, so the 0.27 gap, although its paired interval excludes zero, is not a like-for-like measurement; §12 names the re-derivation that would close this. Third, bootstrap intervals assume communities are exchangeable, which the shared calendar and common generative process make plausible but do not guarantee.</p>
+<p><b>External validity.</b> The audit is one system, one benchmark, one corpus. §5.5 supplies direct evidence that the benchmark is the easier setting, with between-community toxicity spread nearly four times that of the real corpus, and that Finding 1's 42-of-60 fallback rate is a property of the benchmark's community roster rather than of the index, since every real community is covered by the hyperlink graph. Neither magnitude should be assumed to transfer. Finding 4's direction is consistent with results in three other domains [5], [15], [6], which is weak external support for the pattern but none for the specific 0.27 magnitude.</p>
+<p><b>Conclusion validity.</b> With 60 communities and 15 positives, bootstrap intervals on individual AUCs span roughly ±0.17. This is the binding constraint on the paper: it is why Finding 3 is stated as "fails to beat" rather than "is worse than," and why one earlier claim had to be withdrawn (§5.3). Repeated benchmark instantiation across random seeds would tighten these intervals substantially and requires no new code; it is the single most valuable unexecuted step and is not yet run.</p>
+
+<h2>9. Scope: What Is Not Claimed</h2>
+<p><b>No claim of real-world predictive accuracy.</b> The audit establishes whether the instrument recovers a planted signal. It cannot establish whether the system anticipates real community deterioration, and this paper asserts nothing on that question. Section 12 sets out the study design that could.</p>
+<p><b>No claim that the verdict generalises.</b> The four defects are properties of one pipeline. We do not claim composite indices are generally invalid, nor that these particular failures recur elsewhere. The transferable object is the procedure of §7, not the findings of §5.</p>
+<p><b>One structural measurement is reported but not relied upon.</b> A GraphSAGE [30] structural-risk score in the audited system reached AUC 0.415, but on the 18 communities present in the hyperlink graph, of which only 5 are planted. An AUC over 5 positives is uninformative, and no argument in this paper uses it. We report it because it was measured; suppressing a measured result because it is unhelpful is precisely the failure checklist item 7 exists to prevent.</p>
+<p><b>One figure in the audited system is attributable to a baseline, not the deployed model.</b> Its held-out toxicity figures (90.1% accuracy, macro-F1 0.702) were produced by a TF-IDF + logistic-regression baseline, not by the transformer that scores comments in the pipeline. No result in this paper depends on it, since the audit concerns ranking rather than per-message classification, but an earlier write-up of the system reported it in a way that implied otherwise and the correction belongs on the record.</p>
+<p><b>English only.</b> Multilingual toxicity detection is untested and outside the audited system's scope.</p>
+
+<h2>10. Ethics and Broader Impact</h2>
+<p>The audited system ranks communities for moderator attention. A mis-specified instrument therefore has a direct cost: attention directed at stably contentious communities that need none, and withheld from deteriorating ones where intervention is still feasible. Publishing an audit that reduces confidence in such an index is, we argue, the responsible direction of error.</p>
+<p>Two risks attach to this work. First, an audit procedure can lend unwarranted credibility: passing the seven checks of §7 does not establish that an index is valid, only that it does not fail in these specific ways. We state this explicitly to discourage the procedure being cited as a certification. Second, community-level instability scores are potentially stigmatising: a public "unhealthy community" label can itself affect a community [7]. The system audited here exposes such scores through a public dashboard; we note this as a design question the audit does not resolve.</p>
+<p>All data used is either public (SNAP [8], Davidson et al. [16]) or collected from a public archive of public posts. No private data, no personally identifying information beyond public usernames, and no human subjects are involved. The real corpus is aggregated to community-day level before analysis.</p>
+
+<h2>11. Reproducibility</h2>
+<p>All figures and tables are produced by two released scripts in the project repository, both of which resolve paths relative to the repository root and take no manual configuration:</p>
+<ul>
+<li><code>docs/paper/bootstrap_ci.py</code>: Tables 1 to 4 and every number in §5.6, seed 20260903, 20,000 resamples, written to <code>docs/paper/results.json</code>.</li>
+<li><code>docs/paper/make_paper_figures.py</code>: Figures 2 to 10 at 300 dpi, from the same inputs.</li>
+</ul>
+<p>Inputs are <code>outputs/meso_report.csv</code>, <code>outputs/forecast_results.csv</code>, <code>data/ground_truth.json</code>, the benchmark's daily series <code>data/apollo_daily.csv</code>, and the real-corpus counterparts under <code>outputs/real/</code>, all committed. The benchmark itself is regenerable end to end by <code>simulate_data.py</code> from the public Davidson corpus [16] and the released toxicity model; a regeneration performed for this paper reproduced the committed ground truth, comment count and every per-community mean exactly. Figure 1 is reproduced from the source project report. Deployed surfaces are publicly reachable for inspection.</p>
+
+<h2>12. Future Work</h2>
+<p>The audit answers whether the instrument detects a planted signal. It cannot answer whether the system anticipates real deterioration, and no amount of benchmark work will make it able to.</p>
+<p>That requires observed ground truth, and a route is available. Reddit quarantines and bans carry public dates [7]. Training to a fixed window before a documented intervention and testing whether the system flagged the community beforehand yields a measured predictive lead time on real events. Following Zhang et al. [11], such a study should use topic-matched control communities so that deterioration is not confounded with subject matter. Arctic Shift's bulk archives make the required 18 to 24 months per community tractable.</p>
+<p>Secondarily: multi-seed benchmark instantiation to tighten intervals; re-scoring the structural measure across all 60 communities; a like-for-like TFT slope, fitted to the same history the OLS baseline sees, under the paired resampling that <code>bootstrap_ci.py</code> already implements; implementing the variance and autocorrelation indicators that the cited early-warning literature [24] specifies but the pipeline omits; and release of the real corpus with its collection scripts.</p>
+
+<h2>13. Conclusion</h2>
+<p>We applied a known-answer audit to a deployed community-health pipeline and found four defects its outputs did not reveal: two components constant for 70% of the scored population and carrying 45% of the index's weight, a third ranking at chance, a composite that fails to beat its best single input, and a deep forecasting model beaten by an ordinary least-squares slope by 0.27 AUC on the task it was adopted to perform. On real data, the present-state and trend-aware orderings of the same 24 communities share only two of their top five.</p>
+<p>The benchmark that surfaced these cannot support conclusions about online communities, and we make none. Its value is as an instrument: because the answer is known and deliberately easy, a component that fails is unambiguously broken. The first defect, moreover, needed no benchmark at all, and the checklist of §7 gives label-free checks for the others.</p>
+<p>We also report a claim we had to withdraw once we computed intervals for it. We suspect that is the ordinary outcome of auditing one's own system carefully, and that it is undersupplied in this literature relative to how cheap it is.</p>
+
+<h2>References</h2>
+<div class="refs">
+<p>[1] A. Z. Jacobs and H. Wallach, "Measurement and Fairness," in <i>Proc. ACM Conf. on Fairness, Accountability, and Transparency (FAccT)</i>, 2021, pp. 375–385.</p>
+<p>[2] D. Sculley et al., "Hidden Technical Debt in Machine Learning Systems," in <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, 2015, pp. 2503–2511.</p>
+<p>[3] E. Breck, S. Cai, E. Nielsen, M. Salib and D. Sculley, "The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction," in <i>Proc. IEEE Int. Conf. on Big Data</i>, 2017, pp. 1123–1132.</p>
+<p>[4] B. Lim, S. Ö. Arık, N. Loeff and T. Pfister, "Temporal Fusion Transformers for Interpretable Multi-horizon Time Series Forecasting," <i>International Journal of Forecasting</i>, vol. 37, no. 4, pp. 1748–1764, 2021.</p>
+<p>[5] M. F. Dacrema, P. Cremonesi and D. Jannach, "Are We Really Making Much Progress? A Worrying Analysis of Recent Neural Recommendation Approaches," in <i>Proc. ACM Conf. on Recommender Systems (RecSys)</i>, 2019, pp. 101–109.</p>
+<p>[6] S. Makridakis, E. Spiliotis and V. Assimakopoulos, "Statistical and Machine Learning Forecasting Methods: Concerns and Ways Forward," <i>PLOS ONE</i>, vol. 13, no. 3, e0194889, 2018.</p>
+<p>[7] E. Chandrasekharan, U. Pavalanathan, A. Srinivasan, A. Glynn, J. Eisenstein and E. Gilbert, "You Can't Stay Here: The Efficacy of Reddit's 2015 Ban Examined Through Hate Speech," <i>Proc. ACM on Human-Computer Interaction</i>, vol. 1, no. CSCW, art. 31, 2017.</p>
+<p>[8] S. Kumar, W. L. Hamilton, J. Leskovec and D. Jurafsky, "Community Interaction and Conflict on the Web," in <i>Proc. World Wide Web Conf. (WWW)</i>, 2018, pp. 933–943.</p>
+<p>[9] M. Cinelli, G. De Francisci Morales, A. Galeazzi, W. Quattrociocchi and M. Starnini, "The Echo Chamber Effect on Social Media," <i>PNAS</i>, vol. 118, no. 9, e2023301118, 2021.</p>
+<p>[10] S. Jhaver, I. Birman, E. Gilbert and A. Bruckman, "Human-Machine Collaboration for Content Regulation: The Case of Reddit Automoderator," <i>ACM Trans. Computer-Human Interaction</i>, vol. 26, no. 5, art. 31, 2019.</p>
+<p>[11] J. Zhang, J. Chang, C. Danescu-Niculescu-Mizil, L. Dixon, Y. Hua, D. Taraborelli and N. Thain, "Conversations Gone Awry: Detecting Early Signs of Conversational Failure," in <i>Proc. ACL</i>, 2018, pp. 1350–1361.</p>
+<p>[12] L. J. Cronbach and P. E. Meehl, "Construct Validity in Psychological Tests," <i>Psychological Bulletin</i>, vol. 52, no. 4, pp. 281–302, 1955.</p>
+<p>[13] I. D. Raji, A. Smart, R. N. White, M. Mitchell, T. Gebru, B. Hutchinson, J. Smith-Loud, D. Theron and P. Barnes, "Closing the AI Accountability Gap: Defining an End-to-End Framework for Internal Algorithmic Auditing," in <i>Proc. FAccT</i>, 2020, pp. 33–44.</p>
+<p>[14] D. Metaxa, J. S. Park, R. E. Robertson, K. Karahalios, C. Wilson, J. Hancock and C. Sandvig, "Auditing Algorithms: Understanding Algorithmic Systems from the Outside In," <i>Foundations and Trends in Human-Computer Interaction</i>, vol. 14, no. 4, pp. 272–344, 2021.</p>
+<p>[15] J. Lin, "The Neural Hype and Comparisons Against Weak Baselines," <i>ACM SIGIR Forum</i>, vol. 52, no. 2, pp. 40–51, 2018.</p>
+<p>[16] T. Davidson, D. Warmsley, M. Macy and I. Weber, "Automated Hate Speech Detection and the Problem of Offensive Language," in <i>Proc. 11th Int. AAAI Conf. on Web and Social Media (ICWSM)</i>, 2017, pp. 512–515.</p>
+<p>[17] E. Wulczyn, N. Thain and L. Dixon, "Ex Machina: Personal Attacks Seen at Scale," in <i>Proc. WWW</i>, 2017, pp. 1391–1399.</p>
+<p>[18] A. M. Founta et al., "Large Scale Crowdsourcing and Characterization of Twitter Abusive Behavior," in <i>Proc. ICWSM</i>, 2018, pp. 491–500.</p>
+<p>[19] J. Devlin, M.-W. Chang, K. Lee and K. Toutanova, "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding," in <i>Proc. NAACL-HLT</i>, 2019, pp. 4171–4186.</p>
+<p>[20] Y. Liu et al., "RoBERTa: A Robustly Optimized BERT Pretraining Approach," arXiv:1907.11692, 2019.</p>
+<p>[21] L. Hanu and the Unitary team, "Detoxify: Toxic Comment Classification with Transformers," 2020. [Online]. Available: https://github.com/unitaryai/detoxify</p>
+<p>[22] K. Garimella, G. De Francisci Morales, A. Gionis and M. Mathioudakis, "Quantifying Controversy on Social Media," <i>ACM Trans. Social Computing</i>, vol. 1, no. 1, art. 3, 2018.</p>
+<p>[23] C. Danescu-Niculescu-Mizil, R. West, D. Jurafsky, J. Leskovec and C. Potts, "No Country for Old Members: User Lifecycle and Linguistic Change in Online Communities," in <i>Proc. WWW</i>, 2013, pp. 307–318.</p>
+<p>[24] M. Scheffer, J. Bascompte, W. A. Brock, V. Brovkin, S. R. Carpenter, V. Dakos, H. Held, E. H. van Nes, M. Rietkerk and G. Sugihara, "Early-warning Signals for Critical Transitions," <i>Nature</i>, vol. 461, pp. 53–59, 2009.</p>
+<p>[25] D. Salinas, V. Flunkert, J. Gasthaus and T. Januschowski, "DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks," <i>International Journal of Forecasting</i>, vol. 36, no. 3, pp. 1181–1191, 2020.</p>
+<p>[26] B. N. Oreshkin, D. Carpov, N. Chapados and Y. Bengio, "N-BEATS: Neural Basis Expansion Analysis for Interpretable Time Series Forecasting," in <i>Proc. ICLR</i>, 2020.</p>
+<p>[27] J. MacQueen, "Some Methods for Classification and Analysis of Multivariate Observations," in <i>Proc. 5th Berkeley Symp. on Mathematical Statistics and Probability</i>, vol. 1, 1967, pp. 281–297.</p>
+<p>[28] M. Ester, H.-P. Kriegel, J. Sander and X. Xu, "A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise," in <i>Proc. KDD</i>, 1996, pp. 226–231.</p>
+<p>[29] B. Efron and R. J. Tibshirani, <i>An Introduction to the Bootstrap</i>. New York: Chapman &amp; Hall, 1993.</p>
+<p>[30] W. L. Hamilton, R. Ying and J. Leskovec, "Inductive Representation Learning on Large Graphs," in <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, 2017, pp. 1024–1034.</p>
+</div>
+
+</body>
+</html>

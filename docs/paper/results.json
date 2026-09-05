@@ -1,0 +1,211 @@
+{
+  "seed": 20260903,
+  "n_boot": 20000,
+  "n": 60,
+  "n_pos": 15,
+  "benchmark_comments": 261337,
+  "table1": {
+    "toxicity": {
+      "weight": 35,
+      "distinct": 60,
+      "modal_count": 1,
+      "auc": 0.649
+    },
+    "polarisation": {
+      "weight": 30,
+      "distinct": 18,
+      "modal_count": 42,
+      "auc": 0.46
+    },
+    "echo": {
+      "weight": 15,
+      "distinct": 18,
+      "modal_count": 42,
+      "auc": 0.464
+    },
+    "churn": {
+      "weight": 20,
+      "distinct": 59,
+      "modal_count": 2,
+      "auc": 0.498
+    }
+  },
+  "table2": {
+    "instability": {
+      "auc": 1.0,
+      "ci": [
+        1.0,
+        1.0
+      ]
+    },
+    "toxicity": {
+      "auc": 0.649,
+      "ci": [
+        0.483,
+        0.803
+      ]
+    },
+    "chi_low_first": {
+      "auc": 0.574,
+      "ci": [
+        0.393,
+        0.752
+      ]
+    },
+    "trend_only": {
+      "auc": 1.0,
+      "ci": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "table3": {
+    "toxicity_minus_chi_low_first": {
+      "delta": 0.075,
+      "ci": [
+        -0.027,
+        0.203
+      ],
+      "p_gt_0": 0.91
+    },
+    "instability_minus_chi_low_first": {
+      "delta": 0.426,
+      "ci": [
+        0.248,
+        0.607
+      ],
+      "p_gt_0": 1.0
+    }
+  },
+  "table4": {
+    "tft": {
+      "auc": 0.732,
+      "ci": [
+        0.601,
+        0.849
+      ]
+    },
+    "ols_full": {
+      "auc": 1.0,
+      "ci": [
+        1.0,
+        1.0
+      ]
+    },
+    "ols_last30": {
+      "auc": 0.999,
+      "ci": [
+        0.991,
+        1.0
+      ]
+    },
+    "ols_full_minus_tft": {
+      "delta": 0.268,
+      "ci": [
+        0.151,
+        0.399
+      ],
+      "p_gt_0": 1.0
+    },
+    "tft_recall": "15/15",
+    "tft_mean_slope_by_trajectory": {
+      "destabilising": 0.00235,
+      "improving": -0.00078,
+      "stable": 0.00092
+    }
+  },
+  "real": {
+    "n": 24,
+    "spearman_rho": 0.383,
+    "spearman_p": 0.065,
+    "kendall_tau": 0.265,
+    "kendall_p": 0.07,
+    "moved_5_or_more": 13,
+    "largest_move": 17,
+    "largest_mover": "r/changemyview",
+    "top5_shared": [
+      "r/PublicFreakout",
+      "r/politics"
+    ],
+    "rank_by_chi": {
+      "r/PublicFreakout": 1,
+      "r/news": 2,
+      "r/politics": 3,
+      "r/worldnews": 4,
+      "r/atheism": 5,
+      "r/changemyview": 6,
+      "r/Libertarian": 7,
+      "r/movies": 8,
+      "r/technology": 9,
+      "r/AskReddit": 10,
+      "r/wallstreetbets": 11,
+      "r/canada": 12,
+      "r/australia": 13,
+      "r/gaming": 14,
+      "r/nfl": 15,
+      "r/unitedkingdom": 16,
+      "r/history": 17,
+      "r/nba": 18,
+      "r/Conservative": 19,
+      "r/science": 20,
+      "r/philosophy": 21,
+      "r/soccer": 22,
+      "r/books": 23,
+      "r/india": 24
+    },
+    "rank_by_instability": {
+      "r/movies": 1,
+      "r/wallstreetbets": 2,
+      "r/PublicFreakout": 3,
+      "r/politics": 4,
+      "r/nfl": 5,
+      "r/AskReddit": 6,
+      "r/nba": 7,
+      "r/news": 8,
+      "r/atheism": 9,
+      "r/books": 10,
+      "r/australia": 11,
+      "r/technology": 12,
+      "r/Conservative": 13,
+      "r/worldnews": 14,
+      "r/india": 15,
+      "r/canada": 16,
+      "r/science": 17,
+      "r/soccer": 18,
+      "r/Libertarian": 19,
+      "r/unitedkingdom": 20,
+      "r/gaming": 21,
+      "r/philosophy": 22,
+      "r/changemyview": 23,
+      "r/history": 24
+    },
+    "toxicity_sd_real": 0.036,
+    "toxicity_sd_benchmark": 0.134,
+    "toxicity_range_real": [
+      0.03,
+      0.194
+    ],
+    "toxicity_range_benchmark": [
+      0.148,
+      0.692
+    ],
+    "graph_components_distinct_real": {
+      "polarisation": 24,
+      "echo": 24
+    },
+    "comments": 116853,
+    "provenance": {
+      "active_dataset": "real Reddit via Arctic Shift",
+      "comments": 116853,
+      "communities_analysed": 24,
+      "authors": 68043,
+      "days": 41,
+      "date_range": [
+        "2026-07-02",
+        "2026-08-11"
+      ],
+      "note": "CHI, clusters, alerts and forecasts on every page are computed from this corpus. The declared simulation is retained solely for ground-truth validation, where the answer is known in advance."
+    }
+  }
+}
